@@ -1,3 +1,12 @@
 spring:
   application:
     name: user-service
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service_db
+    username: ${DB_USER:postgres}
+    password: ${DB_USER_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
