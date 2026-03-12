@@ -1,6 +1,7 @@
 package ru.devanalyzer.user_service.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final PasswordEncoder passwordEncoder;
@@ -25,6 +27,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
+        log.debug("Processing getAllUsers request");
         return repository.findAll().stream()
                 .map(this::formatToResponse)
                 .toList();
@@ -32,6 +35,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponse findById(Long userId) {
+        log.debug("Processing findById request with userId={}", userId);
         User user = getUserOrThrow(userId);
         return formatToResponse(user);
     }
@@ -39,8 +43,10 @@ public class UserService {
     @Transactional
     public UserResponse save(UserCreateRequest request) {
                 if (repository.existsByEmail(request.email())) {
+                    log.warn("Attempt to register with existing email");
                     throw new UserAlreadyExistsException("User with this email already exists:" + request.email());
                 }
+
                 User saved = repository.save(User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
@@ -53,11 +59,13 @@ public class UserService {
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build());
+        log.info("User registered successfully, userId={}", saved.getId());
         return formatToResponse(saved);
     }
 
     @Transactional
     public UserResponse updateUser(UserUpdateRequest request, Long userId) {
+        log.debug("Processing update request");
         User user = getUserOrThrow(userId);
         if(request.firstName() != null) user.setFirstName(request.firstName());
         if (request.patronymic() != null) user.setPatronymic(request.patronymic());
@@ -66,13 +74,15 @@ public class UserService {
         if (request.position() != null) user.setPosition(request.position());
         user.setUpdatedAt(OffsetDateTime.now());
         User saved = repository.save(user);
+        log.info("User updated successfully");
         return formatToResponse(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-            getUserOrThrow(id);
+        getUserOrThrow(id);
             repository.deleteById(id);
+        log.info("Deleted user, userId={}", id);
     }
     private UserResponse formatToResponse(User user) {
         return UserResponse.builder()

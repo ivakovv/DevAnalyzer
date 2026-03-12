@@ -10,4 +10,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+logging:
+  level:
+    root: INFO
+    ru.devanalyzer.user_service: INFO
 
