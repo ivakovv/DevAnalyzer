@@ -24,7 +24,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return service.findAll();
+        return ResponseEntity.ok(service.findAll());
     }
 
 
@@ -35,7 +35,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserCreateRequest request) {
-        return service.save(request);
+        return ResponseEntity.ok(service.save(request));
     }
 
 
@@ -45,12 +45,13 @@ public class UserController {
                                        @RequestHeader("X-User-Email") String email,
                                        @RequestHeader("X-User-Role") String role
     ) {
-        return service.updateUser(request,userId);
+        return ResponseEntity.ok(service.updateUser(request,userId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        return service.delete(id);
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 

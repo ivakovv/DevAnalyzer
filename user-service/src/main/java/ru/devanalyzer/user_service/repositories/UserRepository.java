@@ -6,4 +6,5 @@ import ru.devanalyzer.user_service.models.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
+    public boolean existsByEmail(String email);
 }
