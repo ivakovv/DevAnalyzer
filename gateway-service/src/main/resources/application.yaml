@@ -1,39 +1,35 @@
 server:
   port: 8080
+
 spring:
   application:
     name: gateway-service
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://user-service
+          uri: http://user-service:8081
           predicates:
             - Path=/api/users/**
-cookie:
-  secure: false
-  domain: localhost
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    hostname: localhost
+cookie:
+  secure: ${COOKIE_SECURE:false}
+  domain: ${COOKIE_DOMAIN:localhost}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration: 900000
-  refresh-token-expiration: 604800000
+  access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
 
 user-service:
-  url: lb://user-service
+  url: http://user-service:8081

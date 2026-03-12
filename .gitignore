@@ -18,3 +18,9 @@ mvnw.cmd
 
 # Help файлы
 HELP.md
+
+# Secrets
+.env
+
+# Docker
+*.tar
