@@ -15,3 +15,5 @@ logging:
     root: INFO
     ru.devanalyzer.user_service: INFO
 
+server:
+  port: 8081
