@@ -1,3 +1,71 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: user-service-api
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/users/**
+            - id: user-service-swagger-ui
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/swagger-ui.html
+              filters:
+                - RewritePath=/docs/user-service/swagger-ui.html, /swagger-ui.html
+            - id: user-service-swagger-ui-resources
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/swagger-ui/**
+              filters:
+                - RewritePath=/docs/user-service/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+            - id: user-service-api-docs
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/v3/api-docs/**
+              filters:
+                - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Gateway Service
+        url: /v3/api-docs
+      - name: User Service
+        url: /docs/user-service/v3/api-docs
+
+cookie:
+  secure: ${COOKIE_SECURE}
+  domain: ${COOKIE_DOMAIN}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  level:
+    ru.devanalyzer.gateway_service: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8081}
