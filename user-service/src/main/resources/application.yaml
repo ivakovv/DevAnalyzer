@@ -4,12 +4,19 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
   datasource:
-    url: jdbc:postgresql://localhost:5432/user_service_db
-    username: ${DB_USER:postgres}
-    password: ${DB_USER_PASSWORD:postgres}
+    url: jdbc:postgresql://localhost:5433/user_service_db
+    username: ${DB_USER}
+    password: ${DB_USER_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 logging:
   level:
     root: INFO

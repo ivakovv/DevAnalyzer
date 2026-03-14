@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.devanalyzer.user_service.dto.UserCreateRequest;
 import ru.devanalyzer.user_service.dto.UserResponse;
 import ru.devanalyzer.user_service.dto.UserUpdateRequest;
+import ru.devanalyzer.user_service.dto.auth.UserValidationResponse;
+import ru.devanalyzer.user_service.enums.Role;
 import ru.devanalyzer.user_service.exceptions.UserAlreadyExistsException;
 import ru.devanalyzer.user_service.exceptions.UserNotFoundException;
 import ru.devanalyzer.user_service.models.User;
@@ -53,7 +55,7 @@ public class UserService {
                 .firstName(request.firstName())
                 .patronymic(request.patronymic())
                 .lastName(request.lastName())
-                .role(request.role())
+                .role(Role.USER)
                 .company(request.company())
                 .position(request.position())
                 .createdAt(OffsetDateTime.now())
@@ -100,5 +102,20 @@ public class UserService {
     private User getUserOrThrow(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with this id was not found: " + id));
+    }
+
+    public UserValidationResponse validateUser(String email, String password) {
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with this email was not found: " + email));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return new UserValidationResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().toString()
+        );
     }
 }

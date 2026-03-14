@@ -1,9 +1,12 @@
-package ru.devanalyzer.user_service.exceptions;
+package ru.devanalyzer.user_service.controllers.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.devanalyzer.user_service.exceptions.UserAlreadyExistsException;
+import ru.devanalyzer.user_service.exceptions.UserNotFoundException;
+import ru.devanalyzer.user_service.exceptions.error.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
