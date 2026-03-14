@@ -9,14 +9,43 @@ spring:
       server:
         webmvc:
           routes:
-            - id: user-service
-              uri: http://localhost:8081
+            - id: user-service-api
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/users/**
+            - id: user-service-swagger-ui
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/swagger-ui.html
+              filters:
+                - RewritePath=/docs/user-service/swagger-ui.html, /swagger-ui.html
+            - id: user-service-swagger-ui-resources
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/swagger-ui/**
+              filters:
+                - RewritePath=/docs/user-service/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+            - id: user-service-api-docs
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/docs/user-service/v3/api-docs/**
+              filters:
+                - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Gateway Service
+        url: /v3/api-docs
+      - name: User Service
+        url: /docs/user-service/v3/api-docs
 
 cookie:
-  secure: ${COOKIE_SECURE:false}
-  domain: ${COOKIE_DOMAIN:localhost}
+  secure: ${COOKIE_SECURE}
+  domain: ${COOKIE_DOMAIN}
 
 management:
   endpoints:
@@ -39,4 +68,4 @@ jwt:
   refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
 
 user-service:
-  url: http://localhost:8081
+  url: ${USER_SERVICE_URL:http://localhost:8081}
