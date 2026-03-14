@@ -26,16 +26,13 @@ public class UserServiceClient {
     public UserValidationResponseDto validateUser(String email, String password) {
 
         try {
-            String url = userServiceUrl + "/user/internal/validate";
-            
-            Map<String, String> request = new HashMap<>();
-            request.put("email", email);
-            request.put("password", password);
+            String url = userServiceUrl + "/internal/users/validate";
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("X-Auth-Email", email);
+            headers.set("X-Auth-Password", password);
 
-            HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
 
             UserValidationResponseDto response = restTemplate.postForObject(
                     url,

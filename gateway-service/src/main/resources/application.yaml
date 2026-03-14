@@ -6,11 +6,13 @@ spring:
     name: gateway-service
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: http://user-service:8081
-          predicates:
-            - Path=/api/users/**
+      server:
+        webmvc:
+          routes:
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/users/**
 
 cookie:
   secure: ${COOKIE_SECURE:false}
@@ -26,10 +28,15 @@ management:
       export:
         enabled: true
 
+logging:
+  level:
+    ru.devanalyzer.gateway_service: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
   refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
 
 user-service:
-  url: http://user-service:8081
+  url: http://localhost:8081
