@@ -86,6 +86,15 @@ public class UserService {
             repository.deleteById(id);
         log.info("Deleted user, userId={}", id);
     }
+    @Transactional(readOnly = false)
+    public void changePassword(String password,Long id) {
+        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException("User with this id was not found:" + id));
+        if (passwordEncoder.matches(password,user.getPassword()))
+            throw new IllegalArgumentException("Новый пароль должен отличаться от старого!");
+        user.setPassword(passwordEncoder.encode(password));
+        log.info("Password for user changed succesfully");
+    }
+
     private UserResponse formatToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
@@ -118,4 +127,5 @@ public class UserService {
                 user.getRole().toString()
         );
     }
+
 }
