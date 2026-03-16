@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.devanalyzer.user_service.dto.PasswordChangeRequest;
 import ru.devanalyzer.user_service.dto.UserCreateRequest;
 import ru.devanalyzer.user_service.dto.UserResponse;
 import ru.devanalyzer.user_service.dto.UserUpdateRequest;
@@ -31,7 +32,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
 
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен")
@@ -39,7 +40,7 @@ public class UserController {
     @SecurityRequirement(name = "Gateway Authentication")
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(userService.findAll());
     }
 
 
@@ -52,7 +53,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> findById(
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(service.findById(principal.getUserId()));
+        return ResponseEntity.ok(userService.findById(principal.getUserId()));
     }
 
 
@@ -63,7 +64,7 @@ public class UserController {
     })
     @PostMapping("/register")
     public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserCreateRequest request) {
-        return ResponseEntity.ok(service.save(request));
+        return ResponseEntity.ok(userService.save(request));
     }
 
     @ApiResponses({
@@ -77,7 +78,7 @@ public class UserController {
     public ResponseEntity<UserResponse> changeUserData(
             @Valid @RequestBody UserUpdateRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(service.updateUser(request, principal.getUserId()));
+        return ResponseEntity.ok(userService.updateUser(request, principal.getUserId()));
     }
 
     @ApiResponses({
@@ -87,7 +88,14 @@ public class UserController {
     @SecurityRequirement(name = "Gateway Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        service.delete(id);
+        userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/me/password")
+    public ResponseEntity<Void> changePassword(@RequestBody PasswordChangeRequest request,
+    @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
+        userService.changePassword(request.password(),principal.getUserId());
+        return ResponseEntity.ok().build();
     }
 }
