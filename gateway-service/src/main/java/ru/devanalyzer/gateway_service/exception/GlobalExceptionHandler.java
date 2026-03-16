@@ -1,4 +1,4 @@
-package ru.devanalyzer.gateway_service.controller.exception;
+package ru.devanalyzer.gateway_service.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
