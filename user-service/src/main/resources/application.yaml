@@ -1,3 +1,5 @@
+server:
+  port: 8081
 spring:
   application:
     name: user-service
@@ -10,6 +12,22 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  cloud:
+    aws:
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+      s3:
+        region: ${S3_REGION}
+        endpoint: ${S3_ENDPOINT}
+io:
+  reflectoring:
+    aws:
+      s3:
+        bucket-name: ${S3_BUCKET_NAME}
+        presigned-url:
+          get-validity: ${S3_GET_URL_VALIDITY}
+          put-validity: ${S3_PUT_URL_VALIDITY}
 
 springdoc:
   api-docs:
@@ -21,6 +39,3 @@ logging:
   level:
     root: INFO
     ru.devanalyzer.user_service: INFO
-
-server:
-  port: 8081

@@ -75,7 +75,7 @@ class UserControllerTest {
     @Test
     void shouldCreateUser() throws Exception {
         UserCreateRequest request = new UserCreateRequest(
-                "test@mail.com", "password123", "Max", null, "Ivanov", Role.USER, null, null
+                "test@mail.com", "password123", "Max", null, "Ivanov",null, null
         );
         when(userService.save(any())).thenReturn(userResponse);
 

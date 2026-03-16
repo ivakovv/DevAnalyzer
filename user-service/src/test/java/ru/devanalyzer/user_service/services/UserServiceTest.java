@@ -52,7 +52,7 @@ class UserServiceTest {
                 .role(Role.USER)
                 .build();
         this.createRequest = new UserCreateRequest(
-                "test@mail.com", "password123", "Igor", "Petrovich", "Igorev", Role.USER, null, null);
+                "test@mail.com", "password123", "Igor", "Petrovich", "Igorev",null, null);
         this.updateRequest = new UserUpdateRequest("Maxim","Olegovich","Ivakov","Tbank","Cleaner");
          updatedUser = User.builder()
                 .id(1L)
