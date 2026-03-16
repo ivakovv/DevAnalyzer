@@ -88,7 +88,7 @@ public class UserController {
     @SecurityRequirement(name = "Gateway Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.delete(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -46,7 +46,7 @@ public class UserService {
     public UserResponse save(UserCreateRequest request) {
                 if (repository.existsByEmail(request.email())) {
                     log.warn("Attempt to register with existing email");
-                    throw new UserAlreadyExistsException("User with this email already exists:" + request.email());
+                    throw new UserAlreadyExistsException("Пользователь с таким email уже существует:" + request.email());
                 }
 
                 User saved = repository.save(User.builder()
@@ -81,18 +81,19 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void deleteUser(Long id) {
         getUserOrThrow(id);
             repository.deleteById(id);
         log.info("Deleted user, userId={}", id);
     }
     @Transactional(readOnly = false)
     public void changePassword(String password,Long id) {
-        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException("User with this id was not found:" + id));
+        User user = getUserOrThrow(id);
         if (passwordEncoder.matches(password,user.getPassword()))
             throw new IllegalArgumentException("Новый пароль должен отличаться от старого!");
         user.setPassword(passwordEncoder.encode(password));
-        log.info("Password for user changed succesfully");
+        user.setUpdatedAt(OffsetDateTime.now());
+        log.info("Password for user changed successfully");
     }
 
     private UserResponse formatToResponse(User user) {
@@ -110,15 +111,15 @@ public class UserService {
 
     private User getUserOrThrow(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with this id was not found: " + id));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id не найден: " + id));
     }
 
     public UserValidationResponse validateUser(String email, String password) {
         User user = repository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with this email was not found: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным email не найден: " + email));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new IllegalArgumentException("Неправильный пароль");
         }
 
         return new UserValidationResponse(

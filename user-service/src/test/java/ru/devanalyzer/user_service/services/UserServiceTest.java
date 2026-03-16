@@ -142,7 +142,7 @@ class UserServiceTest {
     @Test
     void shouldDeleteUserWithExistingId(){
         when(repository.findById(13L)).thenReturn(Optional.of(user));
-        userService.delete(13L);
+        userService.deleteUser(13L);
         verify(repository).deleteById(13L);
     }
 

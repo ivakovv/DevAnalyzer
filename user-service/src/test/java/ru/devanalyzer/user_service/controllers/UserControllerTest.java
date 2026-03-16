@@ -103,7 +103,7 @@ class UserControllerTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
-        doNothing().when(userService).delete(1L);
+        doNothing().when(userService).deleteUser(1L);
 
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isNoContent());
@@ -111,7 +111,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturn404OnDeleteWhenNotFound() throws Exception {
-        doThrow(new UserNotFoundException("Not found")).when(userService).delete(99L);
+        doThrow(new UserNotFoundException("Not found")).when(userService).deleteUser(99L);
 
         mockMvc.perform(delete("/users/99"))
                 .andExpect(status().isNotFound());
