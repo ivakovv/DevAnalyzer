@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.devanalyzer.user_service.exceptions.UserAlreadyExistsException;
 import ru.devanalyzer.user_service.exceptions.UserNotFoundException;
 import ru.devanalyzer.user_service.exceptions.error.ErrorResponse;
+import ru.devanalyzer.user_service.exceptions.s3.S3ObjectNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,6 +25,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> internalServerErrorException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Что-то пошло не так, попробуйте позже!"));
+    }
+
+    @ExceptionHandler(S3ObjectNotFoundException.class)
+    public ResponseEntity<ErrorResponse> objectInS3NotFound(Exception e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
     }
 
 

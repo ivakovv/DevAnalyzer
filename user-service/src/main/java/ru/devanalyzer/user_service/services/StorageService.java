@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import ru.devanalyzer.user_service.exceptions.s3.PresignedUrlGenerationException;
+import ru.devanalyzer.user_service.exceptions.s3.S3ObjectNotFoundException;
 import ru.devanalyzer.user_service.properties.s3.S3BucketProperties;
 
 import java.net.URL;
@@ -20,6 +21,12 @@ public class StorageService {
     private final S3BucketProperties s3BucketProperties;
 
     public URL generateViewablePresignedUrl(String objectKey) {
+
+        if (!s3Template.objectExists(s3BucketProperties.getBucketName(), objectKey)) {
+            log.error("Object with key {}not found in storage", objectKey);
+            throw new S3ObjectNotFoundException("Object with key " + objectKey + " not found in storage");
+        }
+
         try {
             return s3Template.createSignedGetURL(
                     s3BucketProperties.getBucketName(),
