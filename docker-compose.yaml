@@ -1,0 +1,51 @@
+services:
+  postgres-user:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: user_service_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_USER_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d user_service_db"]
+      interval: 10s
+      retries: 5
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/user_service_db
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_REGION: ${S3_REGION}
+      S3_GET_URL_VALIDITY: ${S3_GET_URL_VALIDITY}
+      S3_PUT_URL_VALIDITY: ${S3_PUT_URL_VALIDITY}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      USER_SERVICE_URL: http://user-service:8081
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_EXPIRATION: ${ACCESS_TOKEN_EXPIRATION}
+      REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+    depends_on:
+      - user-service
+
+volumes:
+  postgres_user_data:

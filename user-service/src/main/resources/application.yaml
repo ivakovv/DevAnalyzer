@@ -1,0 +1,41 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: user-service
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service_db
+    username: ${DB_USER}
+    password: ${DB_USER_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  cloud:
+    aws:
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+      s3:
+        region: ${S3_REGION}
+        endpoint: ${S3_ENDPOINT}
+io:
+  reflectoring:
+    aws:
+      s3:
+        bucket-name: ${S3_BUCKET_NAME}
+        presigned-url:
+          get-validity: ${S3_GET_URL_VALIDITY}
+          put-validity: ${S3_PUT_URL_VALIDITY}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
+    ru.devanalyzer.user_service: INFO
