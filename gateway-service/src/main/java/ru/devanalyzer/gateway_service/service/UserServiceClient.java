@@ -48,4 +48,39 @@ public class UserServiceClient {
             throw new RuntimeException("User validation failed", e);
         }
     }
+
+    public UserValidationResponseDto findByEmail(String email) {
+        try {
+            String url = userServiceUrl + "/internal/users/by-email?email=" + email;
+            
+            UserValidationResponseDto response = restTemplate.getForObject(url, UserValidationResponseDto.class);
+            
+            log.info("User found by email: {}", email);
+            return response;
+        } catch (Exception e) {
+            log.error("Failed to find user by email: {}", e.getMessage());
+            return null; 
+        }
+    }
+
+    public void resetPassword(Long userId, String newPassword) {
+        try {
+            String url = userServiceUrl + "/internal/users/" + userId + "/reset-password";
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            Map<String, String> body = new HashMap<>();
+            body.put("newPassword", newPassword);
+            
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+            
+            restTemplate.postForObject(url, entity, Void.class);
+            
+            log.info("Password reset successful for userId: {}", userId);
+        } catch (Exception e) {
+            log.error("Failed to reset password for userId {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Password reset failed", e);
+        }
+    }
 }

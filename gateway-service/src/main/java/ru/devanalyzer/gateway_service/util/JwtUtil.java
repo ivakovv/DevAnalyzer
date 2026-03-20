@@ -26,6 +26,9 @@ public class JwtUtil {
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
 
+    @Value("${jwt.password-reset-token-expiration}")
+    private Long passwordResetExpiration;
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
@@ -115,5 +118,39 @@ public class JwtUtil {
 
     public boolean isRefreshToken(String token) {
         return "REFRESH".equals(extractTokenType(token));
+    }
+
+    public String generatePasswordResetToken(Long userId, String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("tokenType", "PASSWORD_RESET");
+        
+        return Jwts.builder()
+                .claims(claims)
+                .subject(email)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + passwordResetExpiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public boolean isPasswordResetToken(String token) {
+        return "PASSWORD_RESET".equals(extractTokenType(token));
+    }
+
+    public Long getUserIdFromPasswordResetToken(String token) {
+        if (!validateToken(token)) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+        
+        if (!isPasswordResetToken(token)) {
+            throw new IllegalArgumentException("Token is not a password reset token");
+        }
+        
+        if (isTokenExpired(token)) {
+            throw new IllegalArgumentException("Token has expired");
+        }
+        
+        return extractUserId(token);
     }
 }
