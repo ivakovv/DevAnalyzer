@@ -55,7 +55,7 @@ public class UserService {
                 .firstName(request.firstName())
                 .patronymic(request.patronymic())
                 .lastName(request.lastName())
-                .role(Role.USER)
+                .role(request.company() == null && request.position() == null ? Role.USER : Role.HR)
                 .company(request.company())
                 .position(request.position())
                 .createdAt(OffsetDateTime.now())
