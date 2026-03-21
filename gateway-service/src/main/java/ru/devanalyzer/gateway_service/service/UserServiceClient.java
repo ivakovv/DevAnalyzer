@@ -1,5 +1,7 @@
 package ru.devanalyzer.gateway_service.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import ru.devanalyzer.gateway_service.dto.user.UserValidationResponseDto;
+import ru.devanalyzer.gateway_service.exception.ServiceUnavailableException;
 import ru.devanalyzer.gateway_service.exception.user.PasswordResetException;
 import ru.devanalyzer.gateway_service.exception.user.UserNotFoundException;
 import ru.devanalyzer.gateway_service.exception.user.UserServiceException;
@@ -26,6 +29,8 @@ public class UserServiceClient {
     @Value("${user-service.url}")
     private String userServiceUrl;
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "validateUserFallback")
+    @Retry(name = "userService")
     public UserValidationResponseDto validateUser(String email, String password) {
         try {
             String url = userServiceUrl + "/internal/users/validate";
@@ -49,6 +54,8 @@ public class UserServiceClient {
         }
     }
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "findByEmailFallback")
+    @Retry(name = "userService")
     public UserValidationResponseDto findByEmail(String email) {
         try {
             String url = userServiceUrl + "/internal/users/by-email?email=" + email;
@@ -69,10 +76,12 @@ public class UserServiceClient {
         }
     }
 
+    @CircuitBreaker(name = "userService", fallbackMethod = "resetPasswordFallback")
+    @Retry(name = "userService")
     public void resetPassword(Long userId, String newPassword) {
         try {
             String url = userServiceUrl + "/internal/users/" + userId + "/reset-password";
-            
+
             Map<String, String> body = new HashMap<>();
             body.put("newPassword", newPassword);
             
@@ -91,5 +100,20 @@ public class UserServiceClient {
             log.error("Unexpected error during password reset for userId {}: {}", userId, e.getMessage());
             throw new UserServiceException("Неожиданная ошибка при сбросе пароля", e);
         }
+    }
+
+    private UserValidationResponseDto validateUserFallback(String email, String password, Throwable t) {
+        log.error("Fallback: User service unavailable for email: {}. Error: {}", email, t.getMessage());
+        throw new ServiceUnavailableException("User service is temporarily unavailable. Please try again later.");
+    }
+
+    private UserValidationResponseDto findByEmailFallback(String email, Throwable t) {
+        log.error("Fallback: Cannot find user by email: {}. Error: {}", email, t.getMessage());
+        throw new ServiceUnavailableException("User service is temporarily unavailable. Please try again later.");
+    }
+
+    private void resetPasswordFallback(Long userId, String newPassword, Throwable t) {
+        log.error("Fallback: Cannot reset password for userId: {}. Error: {}", userId, t.getMessage());
+        throw new ServiceUnavailableException("Password reset service is temporarily unavailable. Please try again later.");
     }
 }
