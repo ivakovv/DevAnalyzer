@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.devanalyzer.gateway_service.controller.interfaces.AuthenticationApi;
+import ru.devanalyzer.gateway_service.dto.StringDto;
 import ru.devanalyzer.gateway_service.dto.auth.ForgotPasswordRequest;
 import ru.devanalyzer.gateway_service.dto.auth.LoginRequestDto;
 import ru.devanalyzer.gateway_service.dto.auth.ResetPasswordRequest;
@@ -40,10 +41,10 @@ public class AuthenticationController implements AuthenticationApi {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<StringDto> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authenticationService.requestPasswordReset(request.email());
         return ResponseEntity.ok(
-                "Если указанный email зарегистрирован в системе, на него отправлено письмо с инструкциями");
+                new StringDto("Если указанный email зарегистрирован в системе, на него отправлено письмо с инструкциями"));
     }
 
     @PostMapping("/reset-password")

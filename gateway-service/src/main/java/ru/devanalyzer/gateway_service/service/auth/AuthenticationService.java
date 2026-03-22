@@ -101,17 +101,14 @@ public class AuthenticationService {
     public void requestPasswordReset(String email) {
         UserValidationResponseDto user = userServiceClient.findByEmail(email);
 
-        if (user != null) {
-            String token = jwtUtil.generatePasswordResetToken(user.userId(), email);
+        String token = jwtUtil.generatePasswordResetToken(user.userId(), email);
 
-            String resetLink = frontendUrl + "/reset-password?token=" + token;
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
 
-            emailService.sendPasswordResetEmail(email, resetLink);
+        emailService.sendPasswordResetEmail(email, resetLink);
             
-            log.info("Password reset email sent to: {}", email);
-        } else {
-            log.warn("Password reset requested for non-existent email: {}", email);
-        }
+        log.info("Password reset email sent to: {}", email);
+
     }
 
     public void resetPassword(String token, String newPassword) {
