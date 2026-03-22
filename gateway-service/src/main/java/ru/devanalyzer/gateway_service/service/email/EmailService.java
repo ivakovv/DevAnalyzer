@@ -37,6 +37,15 @@ public class EmailService {
             helper.setSubject("Сброс пароля - " + appName);
             helper.setText(buildPasswordResetEmailTemplate(resetLink), true);
 
+            try {
+                ClassPathResource logoResource = new ClassPathResource("templates/logo/logo.png");
+                if (logoResource.exists()) {
+                    helper.addInline("logo", logoResource);
+                }
+            } catch (Exception e) {
+                log.warn("Logo file not found, email will be sent without logo", e);
+            }
+
             mailSender.send(message);
             log.info("Password reset email sent to: {}", toEmail);
         } catch (MessagingException e) {
