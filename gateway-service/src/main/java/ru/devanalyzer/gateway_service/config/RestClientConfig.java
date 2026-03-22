@@ -3,20 +3,18 @@ package ru.devanalyzer.gateway_service.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 @RequiredArgsConstructor
-public class RestTemplateConfig {
+public class RestClientConfig {
 
     private final UserContextInterceptor userContextInterceptor;
 
     @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setInterceptors(List.of(userContextInterceptor));
-        return restTemplate;
+    public RestClient restClient() {
+        return RestClient.builder()
+                .requestInterceptor(userContextInterceptor)
+                .build();
     }
 }

@@ -129,4 +129,32 @@ public class UserService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public UserValidationResponse findByEmail(String email) {
+        log.debug("Processing findByEmail request with email={}", email);
+        User user = repository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            return null;
+        }
+        
+        return new UserValidationResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().toString()
+        );
+    }
+
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) {
+        log.debug("Processing resetPassword request for userId={}", userId);
+        User user = getUserOrThrow(userId);
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(OffsetDateTime.now());
+        repository.save(user);
+        
+        log.info("Password reset successfully for userId={}", userId);
+    }
+
 }
