@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
@@ -32,7 +33,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(fromEmail);
+            helper.setFrom(fromEmail, appName);
             helper.setTo(toEmail);
             helper.setSubject("Сброс пароля - " + appName);
             helper.setText(buildPasswordResetEmailTemplate(resetLink), true);
@@ -51,6 +52,9 @@ public class EmailService {
         } catch (MessagingException e) {
             log.error("Failed to send password reset email to: {}", toEmail, e);
             throw new RuntimeException("Failed to send email", e);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to send password reset email to: {}", toEmail, e);
+            throw new RuntimeException(e);
         }
     }
 
