@@ -1,3 +1,6 @@
 spring:
   application:
     name: analyzer-service
+app:
+  github:
+    token: ${GITHUB_TOKEN}
