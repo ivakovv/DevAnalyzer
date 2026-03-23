@@ -61,7 +61,7 @@ public class EmailService {
     private String buildPasswordResetEmailTemplate(String resetLink) {
         try {
             ClassPathResource resource = new ClassPathResource("templates/password-reset-email.html");
-            String template = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
+            String template = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             
             return template
                     .replace("{{appName}}", appName)
