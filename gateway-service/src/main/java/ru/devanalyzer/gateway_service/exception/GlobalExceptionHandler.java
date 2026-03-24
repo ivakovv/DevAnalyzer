@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import ru.devanalyzer.gateway_service.exception.auth.AuthenticationFailedException;
 import ru.devanalyzer.gateway_service.exception.auth.InvalidTokenException;
 import ru.devanalyzer.gateway_service.exception.auth.RefreshTokenNotFoundException;
@@ -13,6 +14,7 @@ import ru.devanalyzer.gateway_service.exception.user.PasswordResetException;
 import ru.devanalyzer.gateway_service.exception.user.UserNotFoundException;
 import ru.devanalyzer.gateway_service.exception.user.UserServiceException;
 import ru.devanalyzer.gateway_service.exception.user.UserValidationException;
+import ru.devanalyzer.gateway_service.exception.ServiceUnavailableException;
 
 import java.time.OffsetDateTime;
 
@@ -51,6 +53,30 @@ public class GlobalExceptionHandler {
                 OffsetDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(ServiceUnavailableException ex) {
+        log.error("Service unavailable: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
+        log.warn("Circuit breaker or gateway error: {} - {}", ex.getStatusCode(), ex.getReason(), ex);
+
+
+        ErrorResponse error = new ErrorResponse(
+               "Сервис временно недоступен. Пожалуйста, попробуйте позже.",
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

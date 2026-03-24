@@ -25,23 +25,25 @@ spring:
         webmvc:
           routes:
             - id: user-service-api
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: ${USER_SERVICE_URL}
               predicates:
                 - Path=/api/users/**
+              filters:
+                - CircuitBreaker=userService,forward:/fallback/user-service
             - id: user-service-swagger-ui
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: ${USER_SERVICE_URL}
               predicates:
                 - Path=/docs/user-service/swagger-ui.html
               filters:
                 - RewritePath=/docs/user-service/swagger-ui.html, /swagger-ui.html
             - id: user-service-swagger-ui-resources
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: ${USER_SERVICE_URL}
               predicates:
                 - Path=/docs/user-service/swagger-ui/**
               filters:
                 - RewritePath=/docs/user-service/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
             - id: user-service-api-docs
-              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              uri: ${USER_SERVICE_URL}
               predicates:
                 - Path=/docs/user-service/v3/api-docs/**
               filters:
@@ -66,11 +68,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info,prometheus,circuitbreakers,circuitbreakerevents
   prometheus:
     metrics:
       export:
         enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
 
 logging:
   level:
@@ -84,8 +89,36 @@ jwt:
   password-reset-token-expiration: ${PASSWORD_RESET_TOKEN_EXPIRATION}
 
 user-service:
-  url: ${USER_SERVICE_URL:http://localhost:8081}
+  url: ${USER_SERVICE_URL}
 
 app:
   name: DevAnalyzer
   frontend-url: ${FRONTEND_URL}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+      emailService:
+        failure-rate-threshold: 30
+        sliding-window-size: 5
+        wait-duration-in-open-state: 30s
+
+  retry:
+    instances:
+      userService:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+      emailService:
+        max-attempts: 3
+        wait-duration: 2s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
