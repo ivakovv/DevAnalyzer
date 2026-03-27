@@ -29,6 +29,7 @@ services:
       S3_GET_URL_VALIDITY: ${S3_GET_URL_VALIDITY}
       S3_PUT_URL_VALIDITY: ${S3_PUT_URL_VALIDITY}
       S3_ENDPOINT: ${S3_ENDPOINT}
+      API_SERVER_URL: ${API_SERVER_URL}
     depends_on:
       postgres-user:
         condition: service_healthy
