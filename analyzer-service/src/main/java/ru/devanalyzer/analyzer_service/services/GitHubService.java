@@ -16,8 +16,10 @@ public class GitHubService {
     private final GitHubClient gitHubClient;
     private final GitHubStatsRepository gitHubStatsRepository;
 
-    public void getStatsAndSave(String username) {
-        gitHubStatsRepository.save(toEntity(gitHubClient.getGitHubStats(username)));
+    public GitHubStats getStats(String username) {
+        GitHubStats stats = gitHubClient.getGitHubStats(username);
+        gitHubStatsRepository.save(toEntity(stats));
+        return stats;
     }
 
     private GitHubStatsEntity toEntity(GitHubStats stats) {
