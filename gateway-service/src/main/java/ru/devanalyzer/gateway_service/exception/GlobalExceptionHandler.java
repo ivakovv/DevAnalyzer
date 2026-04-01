@@ -9,6 +9,10 @@ import ru.devanalyzer.gateway_service.exception.auth.AuthenticationFailedExcepti
 import ru.devanalyzer.gateway_service.exception.auth.InvalidTokenException;
 import ru.devanalyzer.gateway_service.exception.auth.RefreshTokenNotFoundException;
 import ru.devanalyzer.gateway_service.exception.error.ErrorResponse;
+import ru.devanalyzer.gateway_service.exception.user.PasswordResetException;
+import ru.devanalyzer.gateway_service.exception.user.UserNotFoundException;
+import ru.devanalyzer.gateway_service.exception.user.UserServiceException;
+import ru.devanalyzer.gateway_service.exception.user.UserValidationException;
 
 import java.time.OffsetDateTime;
 
@@ -47,6 +51,50 @@ public class GlobalExceptionHandler {
                 OffsetDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        log.error("User not found: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(UserValidationException.class)
+    public ResponseEntity<ErrorResponse> handleUserValidation(UserValidationException ex) {
+        log.error("User validation error: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(PasswordResetException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordReset(PasswordResetException ex) {
+        log.error("Password reset error: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserServiceException.class)
+    public ResponseEntity<ErrorResponse> handleUserService(UserServiceException ex) {
+        log.error("User service error: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
     @ExceptionHandler(Exception.class)

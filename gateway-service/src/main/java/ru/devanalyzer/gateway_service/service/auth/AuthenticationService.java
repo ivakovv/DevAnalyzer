@@ -12,6 +12,7 @@ import ru.devanalyzer.gateway_service.exception.auth.AuthenticationFailedExcepti
 import ru.devanalyzer.gateway_service.exception.auth.InvalidTokenException;
 import ru.devanalyzer.gateway_service.exception.auth.RefreshTokenNotFoundException;
 import ru.devanalyzer.gateway_service.service.UserServiceClient;
+import ru.devanalyzer.gateway_service.service.email.EmailService;
 import ru.devanalyzer.gateway_service.util.CookieUtil;
 import ru.devanalyzer.gateway_service.util.JwtUtil;
 
@@ -29,6 +30,11 @@ public class AuthenticationService {
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
+    private final EmailService emailService;
 
     public void login(LoginRequestDto request, HttpServletResponse response) {
         try {
@@ -90,5 +96,30 @@ public class AuthenticationService {
         cookieUtil.deleteAccessTokenCookie(response);
         cookieUtil.deleteRefreshTokenCookie(response);
         log.info("User logged out");
+    }
+
+    public void requestPasswordReset(String email) {
+        UserValidationResponseDto user = userServiceClient.findByEmail(email);
+
+        String token = jwtUtil.generatePasswordResetToken(user.userId(), email);
+
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+
+        emailService.sendPasswordResetEmail(email, resetLink);
+            
+        log.info("Password reset email sent to: {}", email);
+
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        try {
+            Long userId = jwtUtil.getUserIdFromPasswordResetToken(token);
+            userServiceClient.resetPassword(userId, newPassword);
+            
+            log.info("Password reset successfully for userId: {}", userId);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid password reset token: {}", e.getMessage());
+            throw new InvalidTokenException(e.getMessage());
+        }
     }
 }
