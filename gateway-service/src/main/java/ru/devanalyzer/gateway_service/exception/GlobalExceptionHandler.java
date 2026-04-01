@@ -134,6 +134,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(KafkaMessagingException.class)
+    public ResponseEntity<ErrorResponse> handleKafkaMessaging(KafkaMessagingException ex) {
+        log.error("Kafka messaging error: {}", ex.getMessage(), ex);
+        ErrorResponse error = new ErrorResponse(
+                "Analysis service is temporarily unavailable. Please try again in a few moments.",
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
