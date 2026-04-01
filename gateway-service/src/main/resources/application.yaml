@@ -48,6 +48,21 @@ spring:
                 - Path=/docs/user-service/v3/api-docs/**
               filters:
                 - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+      properties:
+        retry.backoff.ms: 1000
+        max.in.flight.requests.per.connection: 1
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 60000ms
 
 springdoc:
   api-docs:
@@ -94,6 +109,13 @@ user-service:
 app:
   name: DevAnalyzer
   frontend-url: ${FRONTEND_URL}
+  request-id:
+    prefix: analysis
+
+kafka:
+  topics:
+    analysis-request: analysis-request
+    analysis-response: analysis-response
 
 resilience4j:
   circuitbreaker:
