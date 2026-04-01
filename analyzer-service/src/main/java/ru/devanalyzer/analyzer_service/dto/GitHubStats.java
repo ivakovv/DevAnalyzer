@@ -1,4 +1,14 @@
 package ru.devanalyzer.analyzer_service.dto;
 
-public record GitHubStats(long githubId, int repositories, int stars, int forks, int followers, int commits, long ageInDays) {
-}
+import java.util.List;
+
+public record GitHubStats(
+        long githubId,
+        int repositories,
+        int stars,
+        int forks,
+        int followers,
+        int commits,
+        long ageInDays,
+        List<WeekActivity> heatmap
+) {}

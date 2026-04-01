@@ -40,6 +40,15 @@ app:
           contributionsCollection {
             totalCommitContributions
             restrictedContributionsCount
+            contributionCalendar {
+              weeks {
+                firstDay
+                contributionDays {
+                  date
+                  contributionCount
+                }
+              }
+            }
           }
         }
       }

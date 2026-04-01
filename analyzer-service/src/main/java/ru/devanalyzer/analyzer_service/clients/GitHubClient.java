@@ -7,11 +7,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import ru.devanalyzer.analyzer_service.config.GitHubProperties;
 import ru.devanalyzer.analyzer_service.dto.GitHubStats;
+import ru.devanalyzer.analyzer_service.dto.WeekActivity;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,6 +33,14 @@ public class GitHubClient {
                 .build();
     }
 
+    public Long getGithubId(String username) {
+        JsonNode user = restClient.get()
+                .uri("/users/{username}", username)
+                .retrieve()
+                .body(JsonNode.class);
+        return user.path("id").asLong();
+    }
+
     public GitHubStats getGitHubStats(String username) {
         log.atInfo().addKeyValue("user", username).log("fetching stats github");
         try {
@@ -42,6 +53,7 @@ public class GitHubClient {
             long githubId = 0;
             String cursor = null;
             boolean firstPage = true;
+            List<WeekActivity> heatmap = new ArrayList<>();
 
             while (true) {
                 Map<String, Object> variables = new HashMap<>();
@@ -68,6 +80,20 @@ public class GitHubClient {
                     JsonNode contributions = user.path("contributionsCollection");
                     commits = contributions.path("totalCommitContributions").asInt()
                             + contributions.path("restrictedContributionsCount").asInt();
+
+                    JsonNode weeks = contributions.path("contributionCalendar").path("weeks");
+                    for (JsonNode week : weeks) {
+                        LocalDate weekStart = LocalDate.parse(week.path("firstDay").asText());
+                        JsonNode days = week.path("contributionDays");
+                        int[] dayCounts = new int[days.size()];
+                        int total = 0;
+                        for (int i = 0; i < days.size(); i++) {
+                            int count = days.get(i).path("contributionCount").asInt();
+                            dayCounts[i] = count;
+                            total += count;
+                        }
+                        heatmap.add(new WeekActivity(weekStart, dayCounts, total));
+                    }
                 }
 
                 for (JsonNode repo : user.path("repositories").path("nodes")) {
@@ -83,21 +109,11 @@ public class GitHubClient {
                 }
             }
 
-            log.atInfo()
-                    .addKeyValue("user", username)
-                    .addKeyValue("repositories", repositories)
-                    .addKeyValue("stars", totalStars)
-                    .addKeyValue("forks", totalForks)
-                    .addKeyValue("followers", followers)
-                    .addKeyValue("commits", commits)
-                    .addKeyValue("ageDays", ageInDays)
-                    .log("stats from github succes");
-
-            return new GitHubStats(githubId, repositories, totalStars, totalForks, followers, commits, ageInDays);
+            return new GitHubStats(githubId, repositories, totalStars, totalForks, followers, commits, ageInDays, heatmap);
 
         } catch (Exception e) {
-            log.atError().addKeyValue("user", username).setCause(e).log("faled to fetch github stats");
-            throw new RuntimeException("failed to get github stats : " + username);
+            log.atError().addKeyValue("user", username).setCause(e).log("failed to fetch github stats");
+            throw new RuntimeException("failed to get github stats: " + username);
         }
     }
 }
