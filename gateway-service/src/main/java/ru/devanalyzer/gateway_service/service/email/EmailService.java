@@ -1,5 +1,6 @@
 package ru.devanalyzer.gateway_service.service.email;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,6 +30,8 @@ public class EmailService {
     @Value("${app.name:DevAnalyzer}")
     private String appName;
 
+    @Async
+    @Retry(name = "emailService", fallbackMethod = "sendEmailFallback")
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -61,7 +65,7 @@ public class EmailService {
     private String buildPasswordResetEmailTemplate(String resetLink) {
         try {
             ClassPathResource resource = new ClassPathResource("templates/password-reset-email.html");
-            String template = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
+            String template = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             
             return template
                     .replace("{{appName}}", appName)
@@ -70,5 +74,9 @@ public class EmailService {
             log.error("Failed to load email template", e);
             throw new RuntimeException("Failed to load email template", e);
         }
+    }
+
+    private void sendEmailFallback(String toEmail, String resetLink, Throwable t) {
+        log.error("All attempts to send password reset email failed for: {}", toEmail, t);
     }
 }
