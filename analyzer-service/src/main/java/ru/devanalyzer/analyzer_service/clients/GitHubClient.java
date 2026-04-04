@@ -100,4 +100,12 @@ public class GitHubClient {
             throw new RuntimeException("failed to get github stats : " + username);
         }
     }
+
+    public JsonNode executeGraphQLQuery(String query, Map<String, Object> variables) {
+        return restClient.post()
+                .uri("/graphql")
+                .body(Map.of("query", query, "variables", variables))
+                .retrieve()
+                .body(JsonNode.class);
+    }
 }

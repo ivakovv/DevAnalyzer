@@ -16,6 +16,13 @@ spring:
       ddl-auto: validate
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+kafka:
+  bootstrap-servers: ${KAFKA_SERVERS}
+  consumer:
+    group-id: analyzer-service-group
+  topics:
+    analysis-request: analysis-request
+    analysis-response: analysis-response
 app:
   github:
     token: ${GITHUB_TOKEN}
@@ -43,3 +50,13 @@ app:
           }
         }
       }
+
+analyzer:
+  filter:
+    max-inactivity-years: 2
+    min-size-kb: 10
+
+logging:
+  level:
+    ru.devanalyzer.analyzer_service: DEBUG
+    org.springframework.kafka: INFO

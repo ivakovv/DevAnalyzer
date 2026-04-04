@@ -48,8 +48,6 @@ spring:
                 - Path=/docs/user-service/v3/api-docs/**
               filters:
                 - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
-  kafka:
-    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
   data:
     redis:
       host: ${REDIS_HOST}
@@ -105,7 +103,7 @@ app:
     prefix: analysis
 
 kafka:
-  bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+  bootstrap-servers: ${KAFKA_SERVERS}
   topics:
     analysis-request: analysis-request
     analysis-response: analysis-response
