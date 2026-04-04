@@ -50,14 +50,6 @@ spring:
                 - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 3
-      acks: all
-      properties:
-        retry.backoff.ms: 1000
-        max.in.flight.requests.per.connection: 1
   data:
     redis:
       host: ${REDIS_HOST}
@@ -113,6 +105,7 @@ app:
     prefix: analysis
 
 kafka:
+  bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
   topics:
     analysis-request: analysis-request
     analysis-response: analysis-response
