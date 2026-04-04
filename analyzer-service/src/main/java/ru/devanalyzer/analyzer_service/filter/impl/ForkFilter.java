@@ -15,14 +15,12 @@ public class ForkFilter implements RepositoryFilter {
         if (!repository.isFork()) {
             return true;
         }
-        
-        // TODO: Добавить проверку % изменений через GitHub API
         return false;
     }
     
 
     @Override
     public String getRejectionReason() {
-        return "Repository is a fork without significant changes";
+        return "Repository is a fork";
     }
 }
