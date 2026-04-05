@@ -3,6 +3,8 @@ package ru.devanalyzer.gateway_service.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,6 +55,17 @@ public class GlobalExceptionHandler {
                 OffsetDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity<ErrorResponse> handleAccessDenied(Exception ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                "Access denied. You don't have permission to access this resource.",
+                HttpStatus.FORBIDDEN.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(ServiceUnavailableException.class)
