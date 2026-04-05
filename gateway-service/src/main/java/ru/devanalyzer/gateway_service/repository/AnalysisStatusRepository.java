@@ -2,6 +2,7 @@ package ru.devanalyzer.gateway_service.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import ru.devanalyzer.gateway_service.model.AnalysisStatus;
@@ -13,14 +14,24 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class AnalysisStatusRepository {
 
+    @Value("${spring.data.redis.ttl-status-result}")
+    private final Duration TTL;
+    @Value("${spring.data.redis.status-key-prefix}")
+    private final String STATUS_KEY_PREFIX;
     private final RedisTemplate<String, String> redisTemplate;
-    private static final Duration TTL = Duration.ofDays(30);
-    private static final String STATUS_KEY_PREFIX = "analysis:status:";
 
-    public void saveStatus(String requestId, AnalysisStatus status) {
+    public void saveStatus(String requestId, Long userId, AnalysisStatus status) {
         String key = STATUS_KEY_PREFIX + requestId;
-        redisTemplate.opsForValue().set(key, status.getValue(), TTL);
-        log.debug("Saved status '{}' for requestId: {}", status, requestId);
+        
+        redisTemplate.opsForHash().put(key, "userId", userId.toString());
+        redisTemplate.opsForHash().put(key, "status", status.getValue());
+        redisTemplate.expire(key, TTL);
+        
+        String userIndexKey = "user:analysis:" + userId;
+        redisTemplate.opsForSet().add(userIndexKey, requestId);
+        redisTemplate.expire(userIndexKey, TTL);
+        
+        log.debug("Saved status '{}' for requestId: {}, userId: {}", status, requestId, userId);
     }
 
     public String getStatus(String requestId) {

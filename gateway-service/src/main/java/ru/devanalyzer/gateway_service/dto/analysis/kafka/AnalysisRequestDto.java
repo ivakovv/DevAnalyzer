@@ -5,6 +5,7 @@ import java.util.List;
 
 public record AnalysisRequestDto(
         String requestId,
+        Long userId,
         String githubUsername,
         List<String> resumeTechStack,
         Instant timestamp

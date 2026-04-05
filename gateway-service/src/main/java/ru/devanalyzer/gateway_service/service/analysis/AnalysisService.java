@@ -28,40 +28,41 @@ public class AnalysisService {
     private final AnalysisResultRepository resultRepository;
     private final AnalysisMessageProducer messageProducer;
 
-    @Value("${server.port:8080}")
+    @Value("${server.port}")
     private String serverPort;
 
-    public AnalysisResponseDto startAnalysis(String githubUsername, List<String> resumeTechStack) {
+    public AnalysisResponseDto startAnalysis(String githubUsername, List<String> resumeTechStack, Long userId) {
         AnalysisRequestValidator.validate(githubUsername, resumeTechStack);
 
         Optional<Object> cachedResult = resultRepository.getResult(githubUsername, resumeTechStack, Object.class);
         if (cachedResult.isPresent()) {
-            return handleCachedResult(githubUsername);
+            return handleCachedResult(githubUsername, userId);
         }
 
-        return startNewAnalysis(githubUsername, resumeTechStack);
+        return startNewAnalysis(githubUsername, resumeTechStack, userId);
     }
 
-    private AnalysisResponseDto handleCachedResult(String githubUsername) {
+    private AnalysisResponseDto handleCachedResult(String githubUsername, Long userId) {
         String requestId = requestIdGenerator.generate();
-        log.info("Cache hit for github: {}, returning cached result with new requestId: {}", 
-                githubUsername, requestId);
+        log.info("Cache hit for github: {}, userId: {}, returning cached result with new requestId: {}", 
+                githubUsername, userId, requestId);
         
-        statusRepository.saveStatus(requestId, AnalysisStatus.COMPLETED);
+        statusRepository.saveStatus(requestId, userId, AnalysisStatus.COMPLETED);
         
         return buildResponse(requestId, AnalysisStatus.COMPLETED);
     }
 
-    private AnalysisResponseDto startNewAnalysis(String githubUsername, List<String> resumeTechStack) {
+    private AnalysisResponseDto startNewAnalysis(String githubUsername, List<String> resumeTechStack, Long userId) {
         String requestId = requestIdGenerator.generate();
 
-        log.info("Cache miss for github: {}, starting new analysis, requestId: {}",
-                githubUsername, requestId);
+        log.info("Cache miss for github: {}, userId: {}, starting new analysis, requestId: {}",
+                githubUsername, userId, requestId);
 
-        statusRepository.saveStatus(requestId, AnalysisStatus.PROCESSING);
+        statusRepository.saveStatus(requestId, userId, AnalysisStatus.PROCESSING);
 
         AnalysisRequestDto request = new AnalysisRequestDto(
                 requestId,
+                userId,
                 githubUsername,
                 resumeTechStack,
                 Instant.now()

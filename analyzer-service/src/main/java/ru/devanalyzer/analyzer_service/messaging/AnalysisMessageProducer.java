@@ -19,22 +19,23 @@ public class AnalysisMessageProducer {
     @Value("${kafka.topics.analysis-response}")
     private String responseTopic;
 
-    public void sendAnalysisResponse(String requestId, String status, Object result) {
+    public void sendAnalysisResponse(String requestId, Long userId, String status, Object result) {
         AnalysisResponseDto response = new AnalysisResponseDto(
                 requestId,
+                userId,
                 status,
                 result,
                 Instant.now()
         );
 
-        log.info("Sending analysis response: requestId={}, status={}", requestId, status);
+        log.info("Sending analysis response: requestId={}, userId={}, status={}", requestId, userId, status);
         
         kafkaTemplate.send(responseTopic, requestId, response)
                 .whenComplete((result1, ex) -> {
                     if (ex != null) {
-                        log.error("Failed to send analysis response: requestId={}", requestId, ex);
+                        log.error("Failed to send analysis response: requestId={}, userId={}", requestId, userId, ex);
                     } else {
-                        log.info("Successfully sent analysis response: requestId={}", requestId);
+                        log.info("Successfully sent analysis response: requestId={}, userId={}", requestId, userId);
                     }
                 });
     }

@@ -24,7 +24,8 @@ public class AnalysisService {
     private final GitHubRepositoryService gitHubRepositoryService;
 
     public void processAnalysisRequest(AnalysisRequestDto request) {
-        log.info("Processing analysis for user: {}", request.githubUsername());
+        log.info("Processing analysis for user: {}, userId: {}, requestId: {}", 
+                request.githubUsername(), request.userId(), request.requestId());
         
         try {
             List<GitHubRepository> allRepositories = gitHubRepositoryService.getUserRepositories(request.githubUsername());
@@ -42,11 +43,17 @@ public class AnalysisService {
                     filteredRepositories
             );
             
-            messageProducer.sendAnalysisResponse(request.requestId(), "completed", result);
+            messageProducer.sendAnalysisResponse(
+                    request.requestId(), 
+                    request.userId(),
+                    "completed", 
+                    result
+            );
             
         } catch (Exception e) {
-            log.error("Error during analysis processing for user: {}", request.githubUsername(), e);
-            handleAnalysisError(request.requestId(), e);
+            log.error("Error during analysis processing for user: {}, userId: {}", 
+                    request.githubUsername(), request.userId(), e);
+            handleAnalysisError(request.requestId(), request.userId(), e);
         }
     }
     
@@ -69,11 +76,17 @@ public class AnalysisService {
         return result;
     }
     
-    private void handleAnalysisError(String requestId, Exception e) {
+    private void handleAnalysisError(String requestId, Long userId, Exception e) {
         Map<String, Object> errorResult = new HashMap<>();
         errorResult.put("error", e.getMessage());
         errorResult.put("errorType", e.getClass().getSimpleName());
+
         
-        messageProducer.sendAnalysisResponse(requestId, "failed", errorResult);
+        messageProducer.sendAnalysisResponse(
+                requestId, 
+                userId, 
+                "failed", 
+                errorResult
+        );
     }
 }
