@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.devanalyzer.analyzer_service.clients.GitHubClient;
+import ru.devanalyzer.analyzer_service.dto.GitHubRepo;
 import ru.devanalyzer.analyzer_service.dto.GitHubStats;
+
+import java.util.List;
 import ru.devanalyzer.analyzer_service.dto.WeekActivity;
 import ru.devanalyzer.analyzer_service.entity.CommitHeatmapEntity;
 import ru.devanalyzer.analyzer_service.entity.GitHubStatsEntity;
@@ -25,6 +28,10 @@ public class GitHubService {
     private final CommitHeatMapRepository heatmapRepository;
 
     @Transactional
+    public List<GitHubRepo> getRepositories(String username) {
+        return gitHubClient.getRepositories(username);
+    }
+
     public GitHubStats getStats(String username) {
         Long githubId = gitHubClient.getGithubId(username);
 

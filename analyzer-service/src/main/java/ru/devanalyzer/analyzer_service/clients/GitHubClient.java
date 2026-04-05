@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import ru.devanalyzer.analyzer_service.config.GitHubProperties;
+import ru.devanalyzer.analyzer_service.dto.GitHubRepo;
 import ru.devanalyzer.analyzer_service.dto.GitHubStats;
 import ru.devanalyzer.analyzer_service.dto.WeekActivity;
 
@@ -31,6 +32,44 @@ public class GitHubClient {
                 .defaultHeader("Authorization", "Bearer " + token)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
+    }
+
+    public List<GitHubRepo> getRepositories(String username) {
+        log.atInfo().addKeyValue("user", username).log("fetching repositories");
+        List<GitHubRepo> repos = new ArrayList<>();
+        String cursor = null;
+
+        while (true) {
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("username", username);
+            if (cursor != null) variables.put("after", cursor);
+
+            JsonNode reposNode = restClient.post()
+                    .uri("/graphql")
+                    .body(Map.of("query", gitHubProperties.getReposQuery(), "variables", variables))
+                    .retrieve()
+                    .body(JsonNode.class)
+                    .path("data").path("user").path("repositories");
+
+            for (JsonNode node : reposNode.path("nodes")) {
+                repos.add(new GitHubRepo(
+                        node.path("name").asText(),
+                        node.path("description").asText(null),
+                        node.path("url").asText(),
+                        node.path("stargazerCount").asInt(),
+                        node.path("forkCount").asInt()
+                ));
+            }
+
+            JsonNode pageInfo = reposNode.path("pageInfo");
+            if (pageInfo.path("hasNextPage").asBoolean()) {
+                cursor = pageInfo.path("endCursor").asText();
+            } else {
+                break;
+            }
+        }
+
+        return repos;
     }
 
     public Long getGithubId(String username) {
