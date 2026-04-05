@@ -15,6 +15,7 @@ services:
       retries: 5
 
   user-service:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/user-service:${IMAGE_TAG:-latest}
     build: ./user-service
     ports:
       - "8081:8081"
@@ -101,6 +102,7 @@ services:
         condition: service_healthy
 
   gateway-service:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/gateway-service:${IMAGE_TAG:-latest}
     build: ./gateway-service
     ports:
       - "8080:8080"
