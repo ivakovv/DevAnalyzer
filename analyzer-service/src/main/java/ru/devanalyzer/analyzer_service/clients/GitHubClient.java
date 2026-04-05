@@ -9,6 +9,8 @@ import ru.devanalyzer.analyzer_service.config.GitHubProperties;
 import ru.devanalyzer.analyzer_service.dto.GitHubRepo;
 import ru.devanalyzer.analyzer_service.dto.GitHubStats;
 import ru.devanalyzer.analyzer_service.dto.WeekActivity;
+import ru.devanalyzer.analyzer_service.exceptions.GitHubFetchException;
+import ru.devanalyzer.analyzer_service.exceptions.GitHubUserNotFoundException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -150,9 +152,11 @@ public class GitHubClient {
 
             return new GitHubStats(githubId, repositories, totalStars, totalForks, followers, commits, ageInDays, heatmap);
 
+        } catch (GitHubUserNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.atError().addKeyValue("user", username).setCause(e).log("failed to fetch github stats");
-            throw new RuntimeException("failed to get github stats: " + username);
+            throw new GitHubFetchException(username, e);
         }
     }
 }

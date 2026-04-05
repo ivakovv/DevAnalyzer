@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/github")
 @AllArgsConstructor
-public class GitHubStatsController {
+public class GitHubStatsController implements GitHubStatsApi {
 
     private final GitHubService gitHubService;
 
