@@ -29,6 +29,13 @@ query($username: String!, $after: String) {
         }
         defaultBranchRef {
           name
+          target {
+            ... on Commit {
+              history {
+                totalCount
+              }
+            }
+          }
         }
       }
       pageInfo {

@@ -19,11 +19,11 @@ public class RepositoryFilterService {
     private final List<RepositoryFilter> filters;
 
 
-    public List<GitHubRepository> filterRepositories(List<GitHubRepository> repositories, List<String> techStack) {
-        log.info("Filtering {} repositories with tech stack: {}", repositories.size(), techStack);
+    public List<GitHubRepository> filterRepositories(List<GitHubRepository> repositories, List<String> languages) {
+        log.info("Filtering {} repositories with languages: {}", repositories.size(), languages);
         
         List<RepositoryFilter> allFilters = new ArrayList<>(filters);
-        allFilters.add(new LanguageFilter(techStack));
+        allFilters.add(new LanguageFilter(languages));
         
         List<GitHubRepository> filtered = repositories.stream()
                 .map(repo -> applyFilters(repo, allFilters))

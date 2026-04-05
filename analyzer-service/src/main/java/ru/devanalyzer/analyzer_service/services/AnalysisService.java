@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: GitHub API: Подлинность + Активность для всех отфильтрованных репозиториев
 // TODO: SonarQube: Технологический стек + Качество кода
 // TODO: Аггрегация результатов
 @Slf4j
@@ -22,6 +21,7 @@ public class AnalysisService {
     private final AnalysisMessageProducer messageProducer;
     private final RepositoryFilterService filterService;
     private final GitHubRepositoryService gitHubRepositoryService;
+    private final AuthorshipVerificationService authorshipService;
 
     public void processAnalysisRequest(AnalysisRequestDto request) {
         log.info("Processing analysis for user: {}, userId: {}, requestId: {}", 
@@ -33,13 +33,17 @@ public class AnalysisService {
             
             List<GitHubRepository> filteredRepositories = filterService.filterRepositories(
                     allRepositories, 
-                    request.resumeTechStack()
-            );
+                    request.languages())
+                    //Фильтр по уникальности авторства
+                    .stream()
+                    .filter(repo -> authorshipService.verifyOwnership(repo, request.githubUsername()))
+                    .toList();;
             log.info("After filtering: {} repositories remain for analysis", filteredRepositories.size());
-            
+
             Map<String, Object> result = buildAnalysisResult(
                     request.githubUsername(),
                     allRepositories.size(),
+                    filteredRepositories.size(),
                     filteredRepositories
             );
             
@@ -60,18 +64,20 @@ public class AnalysisService {
     private Map<String, Object> buildAnalysisResult(
             String githubUsername,
             int totalRepos,
+            int filteredRepos,
             List<GitHubRepository> filteredRepositories
     ) {
         Map<String, Object> result = new HashMap<>();
         result.put("githubUsername", githubUsername);
         result.put("totalRepositories", totalRepos);
-        result.put("filteredRepositories", filteredRepositories.size());
+        result.put("filteredRepositories", filteredRepositories);
+        result.put("verifiedRepositories", filteredRepositories.size());
         result.put("analyzedRepositories", filteredRepositories.size());
         result.put("repositories", filteredRepositories.stream()
                 .map(GitHubRepository::name)
                 .toList());
-        result.put("status", "filtering_completed");
-        result.put("message", "Repository filtering completed. All " + filteredRepositories.size() + " repositories will be analyzed.");
+        result.put("message", "Repository filtering and ownership verification completed. " +
+                filteredRepositories.size() + " repositories verified as owner's work.");
         
         return result;
     }

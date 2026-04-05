@@ -11,30 +11,33 @@ import java.util.List;
  */
 public class LanguageFilter implements RepositoryFilter {
     
-    private final List<String> requiredTechStack;
+    private final List<String> requiredLanguages;
     
-    public LanguageFilter(List<String> requiredTechStack) {
-        this.requiredTechStack = requiredTechStack;
+    public LanguageFilter(List<String> requiredLanguages) {
+        this.requiredLanguages = requiredLanguages;
     }
     
     @Override
     public boolean test(GitHubRepository repository) {
-        if (requiredTechStack == null || requiredTechStack.isEmpty()) {
-            return true;
-        }
-        
         List<String> repoLanguages = repository.languages();
-        if (repoLanguages == null || repoLanguages.isEmpty()) {
-            return true;
+
+        if (requiredLanguages != null && !requiredLanguages.isEmpty()) {
+            if (repoLanguages == null || repoLanguages.isEmpty()) {
+                return false;
+            }
+            return repoLanguages.stream()
+                    .anyMatch(repoLang -> requiredLanguages.stream()
+                            .anyMatch(reqLang -> reqLang.equalsIgnoreCase(repoLang)));
         }
         
-        return repoLanguages.stream()
-                .anyMatch(repoLang -> requiredTechStack.stream()
-                        .anyMatch(tech -> tech.equalsIgnoreCase(repoLang)));
+        return repoLanguages != null && !repoLanguages.isEmpty();
     }
     
     @Override
     public String getRejectionReason() {
-        return "Repository languages not in required tech stack: " + requiredTechStack;
+        if (requiredLanguages != null && !requiredLanguages.isEmpty()) {
+            return "Repository languages not in required languages: " + requiredLanguages;
+        }
+        return "Repository has no detected languages";
     }
 }

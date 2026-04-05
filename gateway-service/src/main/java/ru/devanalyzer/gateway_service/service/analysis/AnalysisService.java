@@ -31,28 +31,28 @@ public class AnalysisService {
     @Value("${server.port}")
     private String serverPort;
 
-    public AnalysisResponseDto startAnalysis(String githubUsername, List<String> resumeTechStack, Long userId) {
-        AnalysisRequestValidator.validate(githubUsername, resumeTechStack);
+    public AnalysisResponseDto startAnalysis(String githubUsername, List<String> languages, List<String> techStack, Long userId) {
+        AnalysisRequestValidator.validate(githubUsername, techStack);
 
-        Optional<Object> cachedResult = resultRepository.getResult(githubUsername, resumeTechStack, Object.class);
+        Optional<Object> cachedResult = resultRepository.getResult(githubUsername, techStack, Object.class);
         if (cachedResult.isPresent()) {
             return handleCachedResult(githubUsername, userId);
         }
 
-        return startNewAnalysis(githubUsername, resumeTechStack, userId);
+        return startNewAnalysis(githubUsername, languages, techStack, userId);
     }
 
     private AnalysisResponseDto handleCachedResult(String githubUsername, Long userId) {
         String requestId = requestIdGenerator.generate();
-        log.info("Cache hit for github: {}, userId: {}, returning cached result with new requestId: {}", 
+        log.info("Cache hit for github: {}, userId: {}, returning cached result with new requestId: {}",
                 githubUsername, userId, requestId);
-        
+
         statusRepository.saveStatus(requestId, userId, AnalysisStatus.COMPLETED);
-        
+
         return buildResponse(requestId, AnalysisStatus.COMPLETED);
     }
 
-    private AnalysisResponseDto startNewAnalysis(String githubUsername, List<String> resumeTechStack, Long userId) {
+    private AnalysisResponseDto startNewAnalysis(String githubUsername, List<String> languages, List<String> techStack, Long userId) {
         String requestId = requestIdGenerator.generate();
 
         log.info("Cache miss for github: {}, userId: {}, starting new analysis, requestId: {}",
@@ -64,7 +64,8 @@ public class AnalysisService {
                 requestId,
                 userId,
                 githubUsername,
-                resumeTechStack,
+                languages,
+                techStack,
                 Instant.now()
         );
         messageProducer.sendAnalysisRequest(request);

@@ -99,7 +99,8 @@ public class GitHubRepositoryService {
                 node.path("description").asText(null),
                 node.path("hasIssuesEnabled").asBoolean(),
                 node.path("issues").path("totalCount").asInt(),
-                extractDefaultBranch(node)
+                extractDefaultBranch(node),
+                extractTotalCommits(node)
         );
     }
 
@@ -145,5 +146,19 @@ public class GitHubRepositoryService {
             log.atDebug().addKeyValue("date", dateStr).log("failed to parse date");
             return null;
         }
+    }
+    
+    private int extractTotalCommits(JsonNode repoNode) {
+        JsonNode defaultBranch = repoNode.path("defaultBranchRef");
+        if (defaultBranch.isMissingNode() || defaultBranch.isNull()) {
+            return 0;
+        }
+        
+        JsonNode target = defaultBranch.path("target");
+        if (target.isMissingNode() || target.isNull()) {
+            return 0;
+        }
+        
+        return target.path("history").path("totalCount").asInt(0);
     }
 }

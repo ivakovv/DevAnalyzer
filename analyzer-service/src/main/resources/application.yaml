@@ -55,7 +55,8 @@ analyzer:
   filter:
     max-inactivity-years: 2
     min-size-kb: 10
-
+  authorship:
+    min-ownership-percentage: 30
 logging:
   level:
     ru.devanalyzer.analyzer_service: DEBUG

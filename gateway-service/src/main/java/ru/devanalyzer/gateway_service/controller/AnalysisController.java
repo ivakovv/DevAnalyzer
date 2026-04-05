@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,12 +23,14 @@ public class AnalysisController {
 
     private final AnalysisService analysisService;
 
+    @PreAuthorize("hasAnyRole('HR', 'ADMIN')")
     @PostMapping
     public ResponseEntity<AnalysisResponseDto> startAnalysis(@Valid @RequestBody AnalysisRequest request,
                                                              @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.accepted()
                 .body(analysisService.startAnalysis(
-                        request.githubUsername(), 
+                        request.githubUsername(),
+                        request.languages(),
                         request.techStack(), 
                         principal.getUserId()
                 ));

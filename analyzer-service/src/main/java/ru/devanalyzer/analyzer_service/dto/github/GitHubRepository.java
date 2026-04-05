@@ -11,12 +11,13 @@ public record GitHubRepository(
         int stargazersCount,
         int forksCount,
         String language,
-        List<String> languages, 
+        List<String> languages,
         Instant pushedAt,
         Instant createdAt,
         String description,
         boolean hasIssues,
         int openIssuesCount,
-        String defaultBranch
+        String defaultBranch,
+        int totalCommits  
 ) {
 }

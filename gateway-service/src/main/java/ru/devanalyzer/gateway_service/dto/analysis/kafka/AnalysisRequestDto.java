@@ -7,7 +7,8 @@ public record AnalysisRequestDto(
         String requestId,
         Long userId,
         String githubUsername,
-        List<String> resumeTechStack,
+        List<String> languages,       
+        List<String> techStack,    
         Instant timestamp
 ) {
 }

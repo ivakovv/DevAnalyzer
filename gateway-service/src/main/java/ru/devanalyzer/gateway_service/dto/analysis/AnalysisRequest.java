@@ -9,7 +9,9 @@ public record AnalysisRequest(
         @NotBlank(message = "GitHub username is required")
         String githubUsername,
         
+        List<String> languages,  
+        
         @NotEmpty(message = "Tech stack is required")
-        List<String> techStack
+        List<String> techStack   
 ) {
 }
