@@ -42,10 +42,6 @@ services:
       - "8080:8080"
     environment:
       USER_SERVICE_URL: http://user-service:8081
-      ANALYZER_SERVICE_URL: http://analyzer-service:8082
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
       ACCESS_TOKEN_EXPIRATION: ${ACCESS_TOKEN_EXPIRATION}
       REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION}
@@ -57,71 +53,6 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       - user-service
-      - kafka
-      - redis
-
-  postgres-analyzer:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: analyzer_service_db
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_ANALYZER_PASSWORD}
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_analyzer_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d analyzer_service_db"]
-      interval: 10s
-      retries: 5
-
-  analyzer-service:
-    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/analyzer-service:${IMAGE_TAG:-latest}
-    build: ./analyzer-service
-    ports:
-      - "8082:8082"
-    environment:
-      DB_USER: ${DB_USER}
-      DB_ANALYZER_PASSWORD: ${DB_ANALYZER_PASSWORD}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-analyzer:5432/analyzer_service_db
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
-    depends_on:
-      postgres-analyzer:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
 
 volumes:
   postgres_user_data:
-  postgres_analyzer_data:
-  redis_data:
