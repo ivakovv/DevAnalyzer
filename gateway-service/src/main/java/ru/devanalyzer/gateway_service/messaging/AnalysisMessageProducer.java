@@ -36,7 +36,7 @@ public class AnalysisMessageProducer {
         } catch (Exception ex) {
             log.error("Failed to send analysis request to Kafka for requestId: {}, error: {}", 
                     request.requestId(), ex.getMessage());
-            statusRepository.saveStatus(request.requestId(), AnalysisStatus.FAILED);
+            statusRepository.saveStatus(request.requestId(), request.userId(), AnalysisStatus.FAILED);
             throw new KafkaMessagingException("Failed to send message to Kafka", ex);
         }
     }
@@ -44,7 +44,7 @@ public class AnalysisMessageProducer {
     private void sendAnalysisRequestFallback(AnalysisRequestDto request, Exception ex) {
         log.error("Circuit breaker opened for Kafka producer. RequestId: {}, Error: {}", 
                 request.requestId(), ex.getMessage(), ex);
-        statusRepository.saveStatus(request.requestId(), AnalysisStatus.FAILED);
+        statusRepository.saveStatus(request.requestId(), request.userId(), AnalysisStatus.FAILED);
         throw new KafkaMessagingException("Analysis service temporarily unavailable", ex);
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -18,9 +19,12 @@ public class AnalysisResultRepository {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
-    
-    private static final Duration RESULT_TTL = Duration.ofDays(7);
-    private static final String RESULT_KEY_PREFIX = "analysis:result:";
+
+    @Value("${spring.data.redis.ttl.result}")
+    private Duration RESULT_TTL;
+
+    @Value("${spring.data.redis.keys.result}")
+    private String RESULT_KEY_PREFIX;
 
     public String generateCacheKey(String githubUsername, List<String> techStack) {
         int techStackHash = techStack.stream()

@@ -14,10 +14,15 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class AnalysisStatusRepository {
 
-    @Value("${spring.data.redis.ttl-status-result}")
-    private final Duration TTL;
-    @Value("${spring.data.redis.status-key-prefix}")
-    private final String STATUS_KEY_PREFIX;
+    @Value("${spring.data.redis.ttl.status}")
+    private Duration STATUS_TTL;
+
+    @Value("${spring.data.redis.keys.status}")
+    private String STATUS_KEY_PREFIX;
+
+    @Value("${spring.data.redis.keys.user-index}")
+    private String USER_INDEX_KEY_PREFIX;
+
     private final RedisTemplate<String, String> redisTemplate;
 
     public void saveStatus(String requestId, Long userId, AnalysisStatus status) {
@@ -25,11 +30,11 @@ public class AnalysisStatusRepository {
         
         redisTemplate.opsForHash().put(key, "userId", userId.toString());
         redisTemplate.opsForHash().put(key, "status", status.getValue());
-        redisTemplate.expire(key, TTL);
+        redisTemplate.expire(key, STATUS_TTL);
         
-        String userIndexKey = "user:analysis:" + userId;
+        String userIndexKey = USER_INDEX_KEY_PREFIX + userId;
         redisTemplate.opsForSet().add(userIndexKey, requestId);
-        redisTemplate.expire(userIndexKey, TTL);
+        redisTemplate.expire(userIndexKey, STATUS_TTL);
         
         log.debug("Saved status '{}' for requestId: {}, userId: {}", status, requestId, userId);
     }
@@ -41,7 +46,7 @@ public class AnalysisStatusRepository {
 
     public void saveResult(String githubUsername, String techStackHash, String requestId) {
         String key = "analysis:result:" + githubUsername + ":" + techStackHash;
-        redisTemplate.opsForValue().set(key, requestId, TTL);
+        redisTemplate.opsForValue().set(key, requestId, STATUS_TTL);
         log.debug("Saved result mapping for github: {}, techStack hash: {} -> requestId: {}", 
                 githubUsername, techStackHash, requestId);
     }
