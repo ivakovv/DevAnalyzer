@@ -32,17 +32,16 @@ public class GitHubService {
         return gitHubClient.getRepositories(username);
     }
 
+    @Transactional
     public GitHubStats getStats(String username) {
-        Long githubId = gitHubClient.getGithubId(username);
+        GitHubStats stats = gitHubClient.getGitHubStats(username);
 
-        Optional<GitHubStatsEntity> existing = gitHubStatsRepository.findByGithubId(githubId);
+        Optional<GitHubStatsEntity> existing = gitHubStatsRepository.findByGithubId(stats.githubId());
 
         if (existing.isPresent() && isToday(existing.get().getFetchedAt())) {
-            List<CommitHeatmapEntity> heatmap = heatmapRepository.findByGithubId(githubId);
+            List<CommitHeatmapEntity> heatmap = heatmapRepository.findByGithubId(stats.githubId());
             return toDto(existing.get(), heatmap);
         }
-
-        GitHubStats stats = gitHubClient.getGitHubStats(username);
 
         GitHubStatsEntity entity;
         if (existing.isPresent()) {
