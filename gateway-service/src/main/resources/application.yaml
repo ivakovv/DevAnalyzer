@@ -31,6 +31,28 @@ spring:
                 - Path=/docs/user-service/v3/api-docs/**
               filters:
                 - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
+            - id: analyzer-service-api
+              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/github/**
+            - id: analyzer-service-swagger-ui
+              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/docs/analyzer-service/swagger-ui.html
+              filters:
+                - RewritePath=/docs/analyzer-service/swagger-ui.html, /swagger-ui.html
+            - id: analyzer-service-swagger-ui-resources
+              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/docs/analyzer-service/swagger-ui/**
+              filters:
+                - RewritePath=/docs/analyzer-service/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+            - id: analyzer-service-api-docs
+              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/docs/analyzer-service/v3/api-docs/**
+              filters:
+                - RewritePath=/docs/analyzer-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
 
 springdoc:
   api-docs:
@@ -42,6 +64,8 @@ springdoc:
         url: /v3/api-docs
       - name: User Service
         url: /docs/user-service/v3/api-docs
+      - name: Analyzer Service
+        url: /docs/analyzer-service/v3/api-docs
 
 cookie:
   secure: ${COOKIE_SECURE}
