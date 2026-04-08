@@ -1,0 +1,76 @@
+server:
+  port: 8082
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: analyzer-service
+  datasource:
+    url: ${ANALYZER_DB_URL}
+    username: ${ANALYZER_DB_USERNAME}
+    password: ${ANALYZER_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+app:
+  github:
+    token: ${GITHUB_TOKEN}
+    base-url: https://api.github.com
+    repos-query: |
+      query($username: String!, $after: String) {
+        user(login: $username) {
+          repositories(ownerAffiliations: OWNER, first: 100, after: $after, orderBy: {field: STARGAZERS, direction: DESC}) {
+            nodes {
+              name
+              description
+              url
+              stargazerCount
+              forkCount
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }
+    query: |
+      query($username: String!, $after: String) {
+        user(login: $username) {
+          databaseId
+          login
+          name
+          location
+          company
+          createdAt
+          followers { totalCount }
+          repositories(ownerAffiliations: OWNER, first: 100, after: $after) {
+            totalCount
+            nodes {
+              stargazerCount
+              forkCount
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+          contributionsCollection {
+            totalCommitContributions
+            restrictedContributionsCount
+            contributionCalendar {
+              weeks {
+                firstDay
+                contributionDays {
+                  date
+                  contributionCount
+                }
+              }
+            }
+          }
+        }
+      }
