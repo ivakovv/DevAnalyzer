@@ -42,6 +42,10 @@ app:
       query($username: String!, $after: String) {
         user(login: $username) {
           databaseId
+          login
+          name
+          location
+          company
           createdAt
           followers { totalCount }
           repositories(ownerAffiliations: OWNER, first: 100, after: $after) {

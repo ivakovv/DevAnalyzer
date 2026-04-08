@@ -46,6 +46,10 @@ public class GitHubService {
         GitHubStatsEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();
+            entity.setLogin(stats.login());
+            entity.setName(stats.name());
+            entity.setLocation(stats.location());
+            entity.setCompany(stats.company());
             entity.setRepositories(stats.repositories());
             entity.setStars(stats.stars());
             entity.setForks(stats.forks());
@@ -75,6 +79,10 @@ public class GitHubService {
                 .toList();
         return new GitHubStats(
                 entity.getGithubId(),
+                entity.getLogin(),
+                entity.getName(),
+                entity.getLocation(),
+                entity.getCompany(),
                 entity.getRepositories(),
                 entity.getStars(),
                 entity.getForks(),
@@ -88,6 +96,10 @@ public class GitHubService {
     private GitHubStatsEntity toEntity(GitHubStats stats) {
         return GitHubStatsEntity.builder()
                 .githubId(stats.githubId())
+                .login(stats.login())
+                .name(stats.name())
+                .location(stats.location())
+                .company(stats.company())
                 .repositories(stats.repositories())
                 .stars(stats.stars())
                 .forks(stats.forks())

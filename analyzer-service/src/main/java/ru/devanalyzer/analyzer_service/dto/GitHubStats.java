@@ -4,6 +4,10 @@ import java.util.List;
 
 public record GitHubStats(
         long githubId,
+        String login,
+        String name,
+        String location,
+        String company,
         int repositories,
         int stars,
         int forks,

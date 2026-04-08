@@ -35,18 +35,6 @@ spring:
               uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
               predicates:
                 - Path=/api/github/**
-            - id: analyzer-service-swagger-ui
-              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
-              predicates:
-                - Path=/docs/analyzer-service/swagger-ui.html
-              filters:
-                - RewritePath=/docs/analyzer-service/swagger-ui.html, /swagger-ui.html
-            - id: analyzer-service-swagger-ui-resources
-              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
-              predicates:
-                - Path=/docs/analyzer-service/swagger-ui/**
-              filters:
-                - RewritePath=/docs/analyzer-service/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
             - id: analyzer-service-api-docs
               uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
               predicates:

@@ -68,6 +68,10 @@ public class GitHubClient {
 
             return new GitHubStats(
                     firstPage.path("databaseId").asLong(),
+                    firstPage.path("login").asText(),
+                    firstPage.path("name").asText(null),
+                    firstPage.path("location").asText(null),
+                    firstPage.path("company").asText(null),
                     firstPage.path("repositories").path("totalCount").asInt(),
                     starsForks[0],
                     starsForks[1],
