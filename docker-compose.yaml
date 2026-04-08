@@ -85,6 +85,43 @@ services:
       interval: 10s
       retries: 5
 
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonar:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      postgres-sonar:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres-sonar:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_sonar_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      retries: 5
+
   analyzer-service:
     build: ./analyzer-service
     ports:
@@ -95,10 +132,16 @@ services:
       ANALYZER_DB_PASSWORD: ${ANALYZER_DB_PASSWORD}
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       KAFKA_SERVERS: kafka:29092
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_TOKEN: ${SONAR_TOKEN}
+    volumes:
+      - scan_temp:/tmp/scans
     depends_on:
       postgres-analyzer:
         condition: service_healthy
       kafka:
+        condition: service_healthy
+      sonarqube:
         condition: service_healthy
 
   gateway-service:
@@ -131,3 +174,8 @@ services:
 volumes:
   postgres_user_data:
   postgres_analyzer_data:
+  postgres_sonar_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+  scan_temp:

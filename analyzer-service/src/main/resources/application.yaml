@@ -57,6 +57,16 @@ analyzer:
     min-size-kb: 10
   authorship:
     min-ownership-percentage: 30
+
+sonarqube:
+  host-url: ${SONAR_HOST_URL}
+  token: ${SONAR_TOKEN}
+
+scan:
+  temp-directory: ${SCAN_TEMP_DIR}
+  clone-timeout-minutes: 5
+  scan-timeout-minutes: 10
+
 logging:
   level:
     ru.devanalyzer.analyzer_service: DEBUG
