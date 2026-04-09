@@ -1,6 +1,7 @@
 package ru.devanalyzer.analyzer_service.dto;
 
-import ru.devanalyzer.analyzer_service.services.sonar.RepositoryScanService.RepositoryScanResult;
+
+import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
 
 import java.util.List;
 
