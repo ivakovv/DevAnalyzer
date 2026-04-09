@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.devanalyzer.analyzer_service.dto.kafka.AnalysisRequestDto;
-import ru.devanalyzer.analyzer_service.services.AnalysisService;
+import ru.devanalyzer.analyzer_service.services.core.AnalysisService;
 
 @Slf4j
 @Component

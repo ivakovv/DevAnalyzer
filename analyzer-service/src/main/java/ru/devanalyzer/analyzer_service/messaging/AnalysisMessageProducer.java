@@ -2,7 +2,6 @@ package ru.devanalyzer.analyzer_service.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import ru.devanalyzer.analyzer_service.dto.kafka.AnalysisResponseDto;
@@ -16,10 +15,7 @@ public class AnalysisMessageProducer {
 
     private final KafkaTemplate<String, AnalysisResponseDto> kafkaTemplate;
 
-    @Value("${kafka.topics.analysis-response}")
-    private String responseTopic;
-
-    public void sendAnalysisResponse(String requestId, Long userId, String status, Object result) {
+    public void sendToTopic(String topic, String requestId, Long userId, String status, Object result) {
         AnalysisResponseDto response = new AnalysisResponseDto(
                 requestId,
                 userId,
@@ -28,14 +24,16 @@ public class AnalysisMessageProducer {
                 Instant.now()
         );
 
-        log.info("Sending analysis response: requestId={}, userId={}, status={}", requestId, userId, status);
+        log.info("Sending message to topic {}: requestId={}, userId={}, status={}", 
+                topic, requestId, userId, status);
         
-        kafkaTemplate.send(responseTopic, requestId, response)
-                .whenComplete((result1, ex) -> {
+        kafkaTemplate.send(topic, requestId, response)
+                .whenComplete((sendResult, ex) -> {
                     if (ex != null) {
-                        log.error("Failed to send analysis response: requestId={}, userId={}", requestId, userId, ex);
+                        log.error("Failed to send message to topic {}: requestId={}, userId={}", 
+                                topic, requestId, userId, ex);
                     } else {
-                        log.info("Successfully sent analysis response: requestId={}, userId={}", requestId, userId);
+                        log.debug("Successfully sent message to topic {}: requestId={}", topic, requestId);
                     }
                 });
     }
