@@ -6,6 +6,8 @@ import java.util.List;
 public record GitHubRepository(
         String name,
         String fullName,
+        String cloneUrl,
+        Owner owner,
         boolean isFork,
         int size,
         int stargazersCount,
@@ -18,6 +20,8 @@ public record GitHubRepository(
         boolean hasIssues,
         int openIssuesCount,
         String defaultBranch,
-        int totalCommits  
+        int totalCommits,
+        List<String> topics
 ) {
+    public record Owner(String login) {}
 }

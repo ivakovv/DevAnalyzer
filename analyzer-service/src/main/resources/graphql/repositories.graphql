@@ -4,6 +4,9 @@ query($username: String!, $after: String) {
       nodes {
         name
         nameWithOwner
+        owner {
+          login
+        }
         isFork
         diskUsage
         stargazerCount
@@ -34,6 +37,13 @@ query($username: String!, $after: String) {
               history {
                 totalCount
               }
+            }
+          }
+        }
+        repositoryTopics(first: 10) {
+          nodes {
+            topic {
+              name
             }
           }
         }
