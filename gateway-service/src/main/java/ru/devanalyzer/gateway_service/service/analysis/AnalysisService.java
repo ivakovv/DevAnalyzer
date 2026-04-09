@@ -49,7 +49,7 @@ public class AnalysisService {
 
         statusRepository.saveStatus(requestId, userId, AnalysisStatus.COMPLETED);
 
-        return buildResponse(requestId, AnalysisStatus.COMPLETED);
+        return buildResponse(requestId, userId, AnalysisStatus.COMPLETED);
     }
 
     private AnalysisResponseDto startNewAnalysis(String githubUsername, List<String> languages, List<String> techStack, Long userId) {
@@ -70,12 +70,13 @@ public class AnalysisService {
         );
         messageProducer.sendAnalysisRequest(request);
 
-        return buildResponse(requestId, AnalysisStatus.PROCESSING);
+        return buildResponse(requestId, userId, AnalysisStatus.PROCESSING);
     }
 
-    private AnalysisResponseDto buildResponse(String requestId, AnalysisStatus status) {
+    private AnalysisResponseDto buildResponse(String requestId, Long userId, AnalysisStatus status) {
         return new AnalysisResponseDto(
                 requestId,
+                userId,
                 status.getValue(),
                 "ws://localhost:" + serverPort + "/ws/analysis/" + requestId,
                 OffsetDateTime.now()

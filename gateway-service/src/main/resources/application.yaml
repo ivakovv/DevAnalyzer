@@ -116,6 +116,7 @@ kafka:
   topics:
     analysis-request: analysis-request
     analysis-response: analysis-response
+    analysis-status: analysis-status
 
 resilience4j:
   circuitbreaker:
