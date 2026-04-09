@@ -1,4 +1,4 @@
-package ru.devanalyzer.analyzer_service.config;
+package ru.devanalyzer.analyzer_service.config.kafka;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

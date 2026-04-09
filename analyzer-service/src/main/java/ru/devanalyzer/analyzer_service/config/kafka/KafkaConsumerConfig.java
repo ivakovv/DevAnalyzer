@@ -1,4 +1,4 @@
-package ru.devanalyzer.analyzer_service.config;
+package ru.devanalyzer.analyzer_service.config.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -21,6 +21,9 @@ public class KafkaConsumerConfig {
 
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
+    
+    @Value("${kafka.consumer.concurrency}")
+    private int concurrency;
 
     @Bean
     public ConsumerFactory<String, AnalysisRequestDto> consumerFactory() {
@@ -32,6 +35,7 @@ public class KafkaConsumerConfig {
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, AnalysisRequestDto.class.getName());
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 1800000);
 
         return new DefaultKafkaConsumerFactory<>(
                 config,
@@ -45,6 +49,7 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, AnalysisRequestDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        factory.setConcurrency(concurrency);
         return factory;
     }
 }
