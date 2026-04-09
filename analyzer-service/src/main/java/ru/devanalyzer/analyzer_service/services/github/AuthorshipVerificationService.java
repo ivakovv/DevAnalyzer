@@ -1,4 +1,4 @@
-package ru.devanalyzer.analyzer_service.services;
+package ru.devanalyzer.analyzer_service.services.github;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
