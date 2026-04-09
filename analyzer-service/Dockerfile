@@ -7,7 +7,7 @@ RUN mvn clean package -Dmaven.test.skip=true
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-RUN apk add --no-cache git libstdc++
+RUN apk add --no-cache git libstdc++ nodejs npm
 
 RUN mkdir -p /tmp/scans && chmod 777 /tmp/scans
 
