@@ -23,6 +23,8 @@ kafka:
   topics:
     analysis-request: analysis-request
     analysis-response: analysis-response
+    analysis-status: analysis-status
+  concurrency: ${KAFKA_CONSUMER_CONCURRENCY}
 app:
   github:
     token: ${GITHUB_TOKEN}
@@ -55,6 +57,7 @@ analyzer:
   filter:
     max-inactivity-years: 2
     min-size-kb: 10
+    max-size-mb: 500
   authorship:
     min-ownership-percentage: 30
 

@@ -12,13 +12,18 @@ public class SizeFilter implements RepositoryFilter {
     @Value("${analyzer.filter.min-size-kb}")
     private int minSizeKb;
     
+    @Value("${analyzer.filter.max-size-mb}")
+    private int maxSizeMb;
+    
     @Override
     public boolean test(GitHubRepository repository) {
-        return repository.size() >= minSizeKb;
+        int sizeKb = repository.size();
+        int maxSizeKb = maxSizeMb * 1024;
+        return sizeKb >= minSizeKb && sizeKb <= maxSizeKb;
     }
     
     @Override
     public String getRejectionReason() {
-        return "Repository size is too small (< " + minSizeKb + " KB)";
+        return "Repository size is out of range (must be between " + minSizeKb + " KB and " + maxSizeMb + " MB)";
     }
 }
