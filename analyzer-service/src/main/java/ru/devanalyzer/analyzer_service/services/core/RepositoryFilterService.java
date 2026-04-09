@@ -1,4 +1,4 @@
-package ru.devanalyzer.analyzer_service.services;
+package ru.devanalyzer.analyzer_service.services.core;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
