@@ -6,15 +6,17 @@ import org.springframework.stereotype.Service;
 import ru.devanalyzer.analyzer_service.clients.SonarQubeClient;
 import ru.devanalyzer.analyzer_service.dto.github.GitHubRepository;
 import ru.devanalyzer.analyzer_service.dto.sonar.SonarMetrics;
+import ru.devanalyzer.analyzer_service.services.cache.SonarMetricsCacheService;
 import ru.devanalyzer.analyzer_service.services.detection.FrameworkDetector;
 import ru.devanalyzer.analyzer_service.services.git.GitRepositoryCloner;
 import ru.devanalyzer.analyzer_service.util.TechnologyNameFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class SonarQubeService {
 
+    private final SonarMetricsCacheService cacheService;
     private final GitRepositoryCloner cloner;
     private final SonarScannerExecutor scanner;
     private final SonarQubeClient client;
@@ -31,6 +34,11 @@ public class SonarQubeService {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public SonarMetrics analyzeRepository(GitHubRepository repository, String scanId, String baseDirectory) {
+        Optional<SonarMetrics> cached = cacheService.findCached(repository);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
         String projectKey = generateProjectKey(repository, scanId);
         String repoDirectory = baseDirectory + "/" + sanitizeRepoName(repository.name());
         
@@ -75,6 +83,8 @@ public class SonarQubeService {
                     metrics.maintainabilityRating(),
                     finalTechStack
             );
+
+            cacheService.save(repository, finalMetrics);
             
             log.info("Analysis completed for repository: {}, QualityGate: {}, Bugs: {}, Vulnerabilities: {}",
                     repository.name(), qualityGate, metrics.bugs(), metrics.vulnerabilities());
