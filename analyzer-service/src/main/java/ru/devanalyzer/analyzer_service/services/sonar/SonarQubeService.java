@@ -33,14 +33,13 @@ public class SonarQubeService {
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
-    public SonarMetrics analyzeRepository(GitHubRepository repository, String scanId, String baseDirectory) {
+    public SonarMetrics analyzeRepository(GitHubRepository repository, String scanId, String repoDirectory) {
         Optional<SonarMetrics> cached = cacheService.findCached(repository);
         if (cached.isPresent()) {
             return cached.get();
         }
 
         String projectKey = generateProjectKey(repository, scanId);
-        String repoDirectory = baseDirectory + "/" + sanitizeRepoName(repository.name());
         
         log.info("Starting full analysis for repository: {}, projectKey: {}", repository.name(), projectKey);
         

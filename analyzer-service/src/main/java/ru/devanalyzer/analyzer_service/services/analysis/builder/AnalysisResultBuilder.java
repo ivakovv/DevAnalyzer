@@ -9,6 +9,7 @@ import ru.devanalyzer.analyzer_service.dto.github.GitHubRepository;
 import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.ScanResultCounter;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.SummaryCalculator;
+import ru.devanalyzer.analyzer_service.util.OverallScoreCalculator;
 import ru.devanalyzer.analyzer_service.util.StatisticsCalculator;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class AnalysisResultBuilder {
 
     private final SummaryCalculator summaryCalculator;
     private final ScanResultCounter scanResultCounter;
+    private final OverallScoreCalculator scoreCalculator;
 
     public AnalysisResult build(
             String githubUsername,
@@ -29,6 +31,8 @@ public class AnalysisResultBuilder {
             List<String> requestedFilters
     ) {
         List<RepositoryScanResult> successfulResults = scanResultCounter.extractSuccessfulResults(scanResults);
+        AnalysisSummary summary = buildSummary(successfulResults);
+        Integer overallScore = scoreCalculator.calculateScore(summary);
 
         return new AnalysisResult(
                 githubUsername,
@@ -37,9 +41,10 @@ public class AnalysisResultBuilder {
                 filteredRepositories.size(),
                 scanResultCounter.countSuccessful(scanResults),
                 scanResultCounter.countFailed(scanResults),
-                buildSummary(successfulResults),
+                summary,
                 buildTechStackAnalysis(successfulResults, requestedFilters),
                 scanResults,
+                overallScore,
                 formatCompletionMessage(scanResults)
         );
     }

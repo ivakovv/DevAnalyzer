@@ -15,5 +15,6 @@ public record AnalysisResult(
         AnalysisSummary summary,
         TechStackAnalysis techStackAnalysis,
         List<RepositoryScanResult> repositories,
+        Integer overallScore,
         String message
 ) {}

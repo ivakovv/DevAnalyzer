@@ -75,10 +75,11 @@ public class RepositoryScanService {
             String scanId, 
             String baseDirectory
     ) {
-        log.info("Scanning repository: {}", repo.name());
+        String repoDirectory = baseDirectory + "/" + sanitizeRepoName(repo.name());
+        log.info("Scanning repository: {} in directory: {}", repo.name(), repoDirectory);
         
         try {
-            SonarMetrics metrics = sonarQubeService.analyzeRepository(repo, scanId, baseDirectory);
+            SonarMetrics metrics = sonarQubeService.analyzeRepository(repo, scanId, repoDirectory);
             return new RepositoryScanResult(
                     repo.name(),
                     repo.language(),
@@ -96,6 +97,10 @@ public class RepositoryScanService {
                     e.getMessage()
             );
         }
+    }
+    
+    private String sanitizeRepoName(String repoName) {
+        return repoName.replaceAll("[^a-zA-Z0-9_.-]", "_");
     }
     
     private String createScanDirectory(String scanId) {

@@ -59,6 +59,7 @@ public class StatisticsCalculator {
     }
 
     public static int calculatePercentage(int num1, int num2) {
-        return (int) ((double) num1 / (double) num2) * 100;
+        if (num2 == 0) return 0;
+        return (int) Math.round(((double) num1 / (double) num2) * 100);
     }
 }

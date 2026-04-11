@@ -50,14 +50,14 @@ public class SummaryCalculator {
                 StatisticsCalculator.average(results, r -> r.metrics().coverage()), 2);
     }
 
-    private long countPassedQualityGate(List<RepositoryScanResult> results) {
-        return results.stream()
+    private int countPassedQualityGate(List<RepositoryScanResult> results) {
+        return (int) results.stream()
                 .filter(r -> "OK".equals(r.metrics().qualityGateStatus()))
                 .count();
     }
 
-    private long countFailedQualityGate(List<RepositoryScanResult> results) {
-        return results.stream()
+    private int countFailedQualityGate(List<RepositoryScanResult> results) {
+        return (int) results.stream()
                 .filter(r -> !"OK".equals(r.metrics().qualityGateStatus()))
                 .count();
     }
