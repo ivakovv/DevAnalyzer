@@ -78,7 +78,6 @@ public class AnalysisService {
                 requestId,
                 userId,
                 status.getValue(),
-                "ws://localhost:" + serverPort + "/ws/analysis/" + requestId,
                 OffsetDateTime.now()
         );
     }

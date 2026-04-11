@@ -6,7 +6,6 @@ public record AnalysisResponseDto(
         String requestId,
         Long userId,
         String status,
-        String websocketUrl,
         OffsetDateTime createdAt
 ) {
 }
