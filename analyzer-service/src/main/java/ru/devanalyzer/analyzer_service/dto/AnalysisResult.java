@@ -13,8 +13,7 @@ public record AnalysisResult(
         long successfulScans,
         long failedScans,
         AnalysisSummary summary,
-        List<String> foundTechStack,
-        List<String> requestedFilters,
+        TechStackAnalysis techStackAnalysis,
         List<RepositoryScanResult> repositories,
         String message
 ) {}

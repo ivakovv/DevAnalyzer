@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.devanalyzer.analyzer_service.dto.AnalysisResult;
 import ru.devanalyzer.analyzer_service.dto.AnalysisSummary;
+import ru.devanalyzer.analyzer_service.dto.TechStackAnalysis;
 import ru.devanalyzer.analyzer_service.dto.github.GitHubRepository;
 import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.ScanResultCounter;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.SummaryCalculator;
+import ru.devanalyzer.analyzer_service.util.StatisticsCalculator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,8 +38,7 @@ public class AnalysisResultBuilder {
                 scanResultCounter.countSuccessful(scanResults),
                 scanResultCounter.countFailed(scanResults),
                 buildSummary(successfulResults),
-                buildFoundTechStack(successfulResults),
-                requestedFilters != null ? requestedFilters : List.of(),
+                buildTechStackAnalysis(successfulResults, requestedFilters),
                 scanResults,
                 formatCompletionMessage(scanResults)
         );
@@ -52,6 +54,20 @@ public class AnalysisResultBuilder {
                 .distinct()
                 .sorted()
                 .toList();
+    }
+
+    private TechStackAnalysis buildTechStackAnalysis (List<RepositoryScanResult> successfulResults, List<String> requestedFilters) {
+        List<String> foundTechStack = buildFoundTechStack(successfulResults);
+        List<String> notFoundTechStack = requestedFilters.stream()
+                .filter(element -> !foundTechStack.contains(element))
+                .collect(Collectors.toList());
+
+        return new TechStackAnalysis(
+                requestedFilters,
+                foundTechStack,
+                notFoundTechStack,
+                (100 - StatisticsCalculator.calculatePercentage(notFoundTechStack.size(), requestedFilters.size()))
+        );
     }
 
     private String formatCompletionMessage(List<RepositoryScanResult> scanResults) {

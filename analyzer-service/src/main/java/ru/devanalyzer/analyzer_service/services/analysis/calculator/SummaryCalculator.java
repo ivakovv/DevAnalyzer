@@ -7,6 +7,7 @@ import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
 import ru.devanalyzer.analyzer_service.util.StatisticsCalculator;
 
 import java.util.List;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -124,7 +125,7 @@ public class SummaryCalculator {
     }
 
     private String calculateMedianRating(List<RepositoryScanResult> results,
-                                        java.util.function.Function<RepositoryScanResult, String> ratingExtractor) {
+                                        Function<RepositoryScanResult, String> ratingExtractor) {
         List<String> ratings = results.stream()
                 .map(ratingExtractor)
                 .filter(rating -> rating != null && !rating.isEmpty())

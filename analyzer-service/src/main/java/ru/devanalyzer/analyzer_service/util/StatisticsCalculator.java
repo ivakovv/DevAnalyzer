@@ -57,4 +57,8 @@ public class StatisticsCalculator {
         double multiplier = Math.pow(10, decimals);
         return Math.round(value * multiplier) / multiplier;
     }
+
+    public static int calculatePercentage(int num1, int num2) {
+        return (int) ((double) num1 / (double) num2) * 100;
+    }
 }
