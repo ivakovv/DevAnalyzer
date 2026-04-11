@@ -7,7 +7,7 @@ import ru.devanalyzer.analyzer_service.entity.CommitHeatmapEntity;
 import java.util.List;
 
 public interface CommitHeatMapRepository extends JpaRepository<CommitHeatmapEntity, Long> {
-    List<CommitHeatmapEntity> findByGithubId(Long githubId);
+    List<CommitHeatmapEntity> findByGithubIdOrderByWeekStartAsc(Long githubId);
 
     @Modifying
     @Query("DELETE FROM CommitHeatmapEntity c WHERE c.githubId = :githubId")

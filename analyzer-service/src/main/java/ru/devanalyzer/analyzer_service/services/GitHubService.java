@@ -39,7 +39,7 @@ public class GitHubService {
         Optional<GitHubStatsEntity> existing = gitHubStatsRepository.findByGithubId(stats.githubId());
 
         if (existing.isPresent() && isToday(existing.get().getFetchedAt())) {
-            List<CommitHeatmapEntity> heatmap = heatmapRepository.findByGithubId(stats.githubId());
+            List<CommitHeatmapEntity> heatmap = heatmapRepository.findByGithubIdOrderByWeekStartAsc(stats.githubId());
             return toDto(existing.get(), heatmap);
         }
 
