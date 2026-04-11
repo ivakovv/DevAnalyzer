@@ -15,12 +15,11 @@ public class AnalysisMessageProducer {
 
     private final KafkaTemplate<String, AnalysisResponseDto> kafkaTemplate;
 
-    public void sendToTopic(String topic, String requestId, Long userId, String status, Object result) {
+    public void sendToTopic(String topic, String requestId, Long userId, String status) {
         AnalysisResponseDto response = new AnalysisResponseDto(
                 requestId,
                 userId,
                 status,
-                result,
                 Instant.now()
         );
 

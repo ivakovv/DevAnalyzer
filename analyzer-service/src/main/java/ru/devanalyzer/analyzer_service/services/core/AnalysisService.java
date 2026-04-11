@@ -69,7 +69,6 @@ public class AnalysisService {
                     requestedFilters.stream().distinct().sorted().toList()
             );
 
-            statusNotifier.notifyCompleted(request, result);
 
         } catch (Exception e) {
             log.error("Error during analysis processing for user: {}, userId: {}",
