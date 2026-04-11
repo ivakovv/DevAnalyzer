@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.devanalyzer.gateway_service.dto.analysis.kafka.AnalysisResponseDto;
 import ru.devanalyzer.gateway_service.model.AnalysisStatus;
 import ru.devanalyzer.gateway_service.repository.AnalysisStatusRepository;
+import ru.devanalyzer.gateway_service.service.notification.redis.RedisPublisherService;
 
 @Slf4j
 @Component
@@ -14,6 +15,7 @@ import ru.devanalyzer.gateway_service.repository.AnalysisStatusRepository;
 public class AnalysisStatusConsumer {
 
     private final AnalysisStatusRepository statusRepository;
+    private final RedisPublisherService redisPublisherService;
 
     @KafkaListener(
             topics = "analysis-status",
@@ -32,8 +34,16 @@ public class AnalysisStatusConsumer {
                     status
             );
             
-            log.info("Updated status in Redis for requestId={}: {}", 
-                    statusUpdate.requestId(), statusUpdate.status());
+            log.info("Updated status to Redis: requestId={}, status={}",
+                    statusUpdate.requestId(), status);
+            redisPublisherService.publishStatusUpdate(
+                    statusUpdate.userId().toString(),
+                    statusUpdate.requestId(),
+                    status
+            );
+
+            log.info("Published to Redis Pub/Sub: requestId={}, status={}",
+                    statusUpdate.requestId(), status);
                     
         } catch (IllegalArgumentException e) {
             log.warn("Unknown status value: {}, requestId={}", 

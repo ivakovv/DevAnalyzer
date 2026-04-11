@@ -57,12 +57,11 @@ spring:
         status: 1d
         result: 30d
         user-index: 7d
-
       keys:
         status: "analysis:status:"
-        result: "analysis:result:"
-        user-index: "user:analysis:"
-
+        user-index: "analysis:user:"
+      pubsub:
+        channel: "analysis-updates"
 springdoc:
   api-docs:
     path: /v3/api-docs
