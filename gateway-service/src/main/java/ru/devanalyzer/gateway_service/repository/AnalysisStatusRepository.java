@@ -38,21 +38,4 @@ public class AnalysisStatusRepository {
         
         log.debug("Saved status '{}' for requestId: {}, userId: {}", status, requestId, userId);
     }
-
-    public String getStatus(String requestId) {
-        String key = STATUS_KEY_PREFIX + requestId;
-        return redisTemplate.opsForValue().get(key);
-    }
-
-    public void saveResult(String githubUsername, String techStackHash, String requestId) {
-        String key = "analysis:result:" + githubUsername + ":" + techStackHash;
-        redisTemplate.opsForValue().set(key, requestId, STATUS_TTL);
-        log.debug("Saved result mapping for github: {}, techStack hash: {} -> requestId: {}", 
-                githubUsername, techStackHash, requestId);
-    }
-
-    public String findExistingResult(String githubUsername, String techStackHash) {
-        String key = "analysis:result:" + githubUsername + ":" + techStackHash;
-        return redisTemplate.opsForValue().get(key);
-    }
 }
