@@ -59,6 +59,20 @@ spring:
               filters:
                 - RewritePath=/docs/analyzer-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 60000ms
+      ttl:
+        status: 1d
+        result: 30d
+        user-index: 7d
+      keys:
+        status: "analysis:status:"
+        user-index: "analysis:user:"
+      pubsub:
+        channel: "analysis-updates"
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -106,6 +120,15 @@ user-service:
 app:
   name: DevAnalyzer
   frontend-url: ${FRONTEND_URL}
+  request-id:
+    prefix: analysis
+
+kafka:
+  bootstrap-servers: ${KAFKA_SERVERS}
+  topics:
+    analysis-request: analysis-request
+    analysis-response: analysis-response
+    analysis-status: analysis-status
 
 resilience4j:
   circuitbreaker:
@@ -120,6 +143,13 @@ resilience4j:
         failure-rate-threshold: 30
         sliding-window-size: 5
         wait-duration-in-open-state: 30s
+      kafkaProducer:
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        minimum-number-of-calls: 5
 
   retry:
     instances:
@@ -133,4 +163,12 @@ resilience4j:
         wait-duration: 2s
         enable-exponential-backoff: true
         exponential-backoff-multiplier: 2
+      kafkaProducer:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.kafka.KafkaException
+          - java.util.concurrent.TimeoutException
 

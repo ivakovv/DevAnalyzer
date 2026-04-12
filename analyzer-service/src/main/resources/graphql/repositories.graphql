@@ -1,0 +1,57 @@
+query($username: String!, $after: String) {
+  user(login: $username) {
+    repositories(ownerAffiliations: OWNER, first: 100, after: $after) {
+      nodes {
+        name
+        nameWithOwner
+        owner {
+          login
+        }
+        isFork
+        diskUsage
+        stargazerCount
+        forkCount
+        primaryLanguage {
+          name
+        }
+        languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+          edges {
+            node {
+              name
+            }
+            size
+          }
+          totalSize
+        }
+        pushedAt
+        createdAt
+        description
+        hasIssuesEnabled
+        issues(states: OPEN) {
+          totalCount
+        }
+        defaultBranchRef {
+          name
+          target {
+            ... on Commit {
+              history {
+                totalCount
+              }
+            }
+          }
+        }
+        repositoryTopics(first: 10) {
+          nodes {
+            topic {
+              name
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@ package ru.devanalyzer.gateway_service.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,6 +55,17 @@ public class GlobalExceptionHandler {
                 OffsetDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity<ErrorResponse> handleAccessDenied(Exception ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                "Access denied. You don't have permission to access this resource.",
+                HttpStatus.FORBIDDEN.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(ServiceUnavailableException.class)
@@ -117,6 +130,28 @@ public class GlobalExceptionHandler {
         log.error("User service error: {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
                 ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
+    @ExceptionHandler(InvalidAnalysisRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAnalysisRequest(InvalidAnalysisRequestException ex) {
+        log.error("Invalid analysis request: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                OffsetDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(KafkaMessagingException.class)
+    public ResponseEntity<ErrorResponse> handleKafkaMessaging(KafkaMessagingException ex) {
+        log.error("Kafka messaging error: {}", ex.getMessage(), ex);
+        ErrorResponse error = new ErrorResponse(
+                "Analysis service is temporarily unavailable. Please try again in a few moments.",
                 HttpStatus.SERVICE_UNAVAILABLE.value(),
                 OffsetDateTime.now()
         );

@@ -1,4 +1,4 @@
-package ru.devanalyzer.analyzer_service.config;
+package ru.devanalyzer.analyzer_service.config.properties;
 
 import lombok.Getter;
 import lombok.Setter;

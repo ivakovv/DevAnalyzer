@@ -14,8 +14,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+kafka:
+  bootstrap-servers: ${KAFKA_SERVERS}
+  consumer:
+    group-id: analyzer-service-group
+  topics:
+    analysis-request: analysis-request
+    analysis-response: analysis-response
+    analysis-status: analysis-status
+  concurrency: ${KAFKA_CONSUMER_CONCURRENCY}
 app:
   github:
     token: ${GITHUB_TOKEN}
@@ -74,3 +86,61 @@ app:
           }
         }
       }
+
+analyzer:
+  filter:
+    max-inactivity-years: 2
+    min-size-kb: 10
+    max-size-mb: 500
+  authorship:
+    min-ownership-percentage: 30
+
+sonarqube:
+  host-url: ${SONAR_HOST_URL}
+  token: ${SONAR_TOKEN}
+
+scan:
+  temp-directory: ${SCAN_TEMP_DIR}
+  clone-timeout-minutes: 5
+  scan-timeout-minutes: 10
+
+scoring:
+  weights:
+    quality-gate: 0.15      # 15% - Процент репозиториев, прошедших Quality Gate (бинарная метрика)
+    security: 0.10          # 10% - Безопасность: уязвимости и рейтинг (снижено из-за парадокса простых проектов)
+    reliability: 0.15       # 15% - Надежность: баги и рейтинг
+    maintainability: 0.10   # 10% - Поддерживаемость: code smells и рейтинг
+    coverage: 0.10          # 10% - Покрытие тестами
+    duplication: 0.05       # 5% - Дублирование кода
+    complexity: 0.35        # 35% - Сложность проектов (самый важный фактор для оценки опыта разработчика)
+  
+  complexity:
+    project-size-weight: 0.40           # 40% - Вес размера проекта в complexity score
+    cognitive-complexity-weight: 0.30   # 30% - Вес cognitive complexity
+    repository-count-weight: 0.20       # 20% - Вес количества репозиториев
+    file-count-weight: 0.10             # 10% - Вес количества файлов
+    
+    min-lines-threshold: 1000           # Минимум строк для среднего балла
+    max-lines-threshold: 10000          # Максимум строк для полного балла
+    
+    min-repos-threshold: 3              # Минимум репозиториев для среднего балла
+    max-repos-threshold: 10             # Максимум репозиториев для полного балла
+    
+    min-files-threshold: 10             # Минимум файлов для среднего балла
+    max-files-threshold: 50             # Максимум файлов для полного балла
+    
+    cognitive-complexity-divisor: 100   # Делитель для нормализации cognitive complexity
+  
+  penalties:
+    vulnerability-penalty: 5           # Штраф за каждую уязвимость (баллов)
+    vulnerability-max-penalty: 50      # Максимальный штраф за уязвимости
+    bug-penalty: 10                    # Штраф за каждый баг (баллов)
+    bug-max-penalty: 40                # Максимальный штраф за баги
+    code-smell-divisor: 10             # Делитель для code smells (смягчает штраф)
+    code-smell-max-penalty: 30         # Максимальный штраф за code smells
+    duplication-multiplier: 10         # Множитель для процента дублирования
+
+logging:
+  level:
+    ru.devanalyzer.analyzer_service: DEBUG
+    org.springframework.kafka: INFO
