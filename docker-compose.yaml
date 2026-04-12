@@ -169,6 +169,7 @@ services:
       KAFKA_SERVERS: kafka:29092
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      API_SERVER_URL: ${API_SERVER_URL}
     depends_on:
       user-service:
         condition: service_started
