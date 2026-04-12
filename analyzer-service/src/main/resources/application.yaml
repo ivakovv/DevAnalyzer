@@ -32,10 +32,32 @@ app:
   github:
     token: ${GITHUB_TOKEN}
     base-url: https://api.github.com
+    repos-query: |
+      query($username: String!, $after: String) {
+        user(login: $username) {
+          repositories(ownerAffiliations: OWNER, first: 100, after: $after, orderBy: {field: STARGAZERS, direction: DESC}) {
+            nodes {
+              name
+              description
+              url
+              stargazerCount
+              forkCount
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }
     query: |
       query($username: String!, $after: String) {
         user(login: $username) {
           databaseId
+          login
+          name
+          location
+          company
           createdAt
           followers { totalCount }
           repositories(ownerAffiliations: OWNER, first: 100, after: $after) {
@@ -52,6 +74,15 @@ app:
           contributionsCollection {
             totalCommitContributions
             restrictedContributionsCount
+            contributionCalendar {
+              weeks {
+                firstDay
+                contributionDays {
+                  date
+                  contributionCount
+                }
+              }
+            }
           }
         }
       }

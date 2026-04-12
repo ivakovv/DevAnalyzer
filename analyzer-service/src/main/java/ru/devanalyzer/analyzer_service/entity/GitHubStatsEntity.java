@@ -22,6 +22,18 @@ public class GitHubStatsEntity {
     private Long githubId;
 
     @Column(nullable = false)
+    private String login;
+
+    @Column
+    private String name;
+
+    @Column
+    private String location;
+
+    @Column
+    private String company;
+
+    @Column(nullable = false)
     private int repositories;
 
     @Column(nullable = false)

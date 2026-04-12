@@ -13,4 +13,5 @@ public class GitHubProperties {
 
     private String baseUrl;
     private String query;
+    private String reposQuery;
 }
