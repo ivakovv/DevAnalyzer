@@ -123,6 +123,7 @@ services:
       retries: 5
 
   analyzer-service:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/analyzer-service:${IMAGE_TAG:-latest}
     build: ./analyzer-service
     ports:
       - "8082:8082"
