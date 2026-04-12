@@ -7,6 +7,7 @@ import ru.devanalyzer.analyzer_service.dto.AnalysisSummary;
 import ru.devanalyzer.analyzer_service.dto.TechStackAnalysis;
 import ru.devanalyzer.analyzer_service.dto.github.GitHubRepository;
 import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
+import ru.devanalyzer.analyzer_service.services.GitHubService;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.ScanResultCounter;
 import ru.devanalyzer.analyzer_service.services.analysis.calculator.SummaryCalculator;
 import ru.devanalyzer.analyzer_service.util.OverallScoreCalculator;
@@ -22,6 +23,7 @@ public class AnalysisResultBuilder {
     private final SummaryCalculator summaryCalculator;
     private final ScanResultCounter scanResultCounter;
     private final OverallScoreCalculator scoreCalculator;
+    private final GitHubService gitHubService;
 
     public AnalysisResult build(
             String githubUsername,
@@ -45,6 +47,8 @@ public class AnalysisResultBuilder {
                 buildTechStackAnalysis(successfulResults, requestedFilters),
                 scanResults,
                 overallScore,
+                gitHubService.getStats(githubUsername),
+                gitHubService.getRepositories(githubUsername),
                 formatCompletionMessage(scanResults)
         );
     }

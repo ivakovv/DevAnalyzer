@@ -16,5 +16,7 @@ public record AnalysisResult(
         TechStackAnalysis techStackAnalysis,
         List<RepositoryScanResult> repositories,
         Integer overallScore,
+        GitHubStats gitHubStats,
+        List<GitHubRepo> gitHubRepo,
         String message
 ) {}
