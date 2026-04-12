@@ -137,6 +137,7 @@ services:
       SONAR_TOKEN: ${SONAR_TOKEN}
       SCAN_TEMP_DIR: /tmp/scans
       KAFKA_CONSUMER_CONCURRENCY: ${KAFKA_CONSUMER_CONCURRENCY}
+      API_SERVER_URL: ${API_SERVER_URL}
     volumes:
       - scan_temp:/tmp/scans
     depends_on:
