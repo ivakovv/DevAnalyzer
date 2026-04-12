@@ -9,8 +9,8 @@ CREATE TABLE sonar_metrics_cache (
     bugs INTEGER,
     vulnerabilities INTEGER,
     code_smells INTEGER,
-    ALTER COLUMN coverage TYPE DOUBLE PRECISION,
-    ALTER COLUMN duplications TYPE DOUBLE PRECISION;
+    coverage DOUBLE PRECISION,
+    duplications DOUBLE PRECISION,
     lines_of_code INTEGER,
     security_rating VARCHAR(1),
     reliability_rating VARCHAR(1),
