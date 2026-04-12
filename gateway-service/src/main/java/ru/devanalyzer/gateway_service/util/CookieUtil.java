@@ -54,8 +54,7 @@ public class CookieUtil {
         if (!"localhost".equals(domain)) {
             sb.append("Domain=").append(domain).append("; ");
         }
-        String sameSite = secure ? "None" : "Lax";
-        sb.append("SameSite=").append(sameSite);
+        sb.append("SameSite=None");
         response.addHeader("Set-Cookie", sb.toString());
     }
 
