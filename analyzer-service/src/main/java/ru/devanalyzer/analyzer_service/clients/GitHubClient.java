@@ -108,6 +108,14 @@ public class GitHubClient {
         return new int[]{totalStars, totalForks};
     }
 
+    public JsonNode executeGraphQLQuery(String query, Map<String, Object> variables) {
+        return restClient.post()
+                .uri("/graphql")
+                .body(Map.of("query", query, "variables", variables))
+                .retrieve()
+                .body(JsonNode.class);
+    }
+
     private JsonNode executeQuery(String query, String username, String cursor) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("username", username);
