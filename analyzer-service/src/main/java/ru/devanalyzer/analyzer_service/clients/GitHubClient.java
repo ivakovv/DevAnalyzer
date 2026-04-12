@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import ru.devanalyzer.analyzer_service.config.GitHubProperties;
+import ru.devanalyzer.analyzer_service.config.properties.GitHubProperties;
 import ru.devanalyzer.analyzer_service.dto.GitHubRepo;
 import ru.devanalyzer.analyzer_service.dto.GitHubStats;
 import ru.devanalyzer.analyzer_service.dto.WeekActivity;

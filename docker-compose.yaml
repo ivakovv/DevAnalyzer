@@ -50,6 +50,78 @@ services:
       interval: 10s
       retries: 5
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonar:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      postgres-sonar:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres-sonar:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_sonar_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      retries: 5
+
   analyzer-service:
     build: ./analyzer-service
     ports:
@@ -59,8 +131,19 @@ services:
       ANALYZER_DB_USERNAME: ${ANALYZER_DB_USERNAME}
       ANALYZER_DB_PASSWORD: ${ANALYZER_DB_PASSWORD}
       GITHUB_TOKEN: ${GITHUB_TOKEN}
+      KAFKA_SERVERS: kafka:29092
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_TOKEN: ${SONAR_TOKEN}
+      SCAN_TEMP_DIR: /tmp/scans
+      KAFKA_CONSUMER_CONCURRENCY: ${KAFKA_CONSUMER_CONCURRENCY}
+    volumes:
+      - scan_temp:/tmp/scans
     depends_on:
       postgres-analyzer:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      sonarqube:
         condition: service_healthy
 
   gateway-service:
@@ -80,9 +163,22 @@ services:
       EMAIL_USERNAME: ${EMAIL_USERNAME}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       FRONTEND_URL: ${FRONTEND_URL}
+      KAFKA_SERVERS: kafka:29092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
-      - user-service
+      user-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_user_data:
   postgres_analyzer_data:
+  postgres_sonar_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+  scan_temp:
