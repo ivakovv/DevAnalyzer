@@ -19,23 +19,19 @@ public class CookieUtil {
     private String domain;
 
     public void addAccessTokenCookie(HttpServletResponse response, String token, int maxAge) {
-        Cookie cookie = createCookie("accessToken", token, maxAge);
-        response.addCookie(cookie);
+        addCookieHeader(response, "accessToken", token, maxAge);
     }
 
     public void addRefreshTokenCookie(HttpServletResponse response, String token, int maxAge) {
-        Cookie cookie = createCookie("refreshToken", token, maxAge);
-        response.addCookie(cookie);
+        addCookieHeader(response, "refreshToken", token, maxAge);
     }
 
     public void deleteAccessTokenCookie(HttpServletResponse response) {
-        Cookie cookie = createCookie("accessToken", "", 0);
-        response.addCookie(cookie);
+        addCookieHeader(response, "accessToken", "", 0);
     }
 
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = createCookie("refreshToken", "", 0);
-        response.addCookie(cookie);
+        addCookieHeader(response, "refreshToken", "", 0);
     }
 
     public Optional<String> getAccessTokenFromCookie(HttpServletRequest request) {
@@ -46,16 +42,21 @@ public class CookieUtil {
         return getCookieValue(request, "refreshToken");
     }
 
-    private Cookie createCookie(String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secure);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-        if (!"localhost".equals(domain)) {
-            cookie.setDomain(domain);
+    private void addCookieHeader(HttpServletResponse response, String name, String value, int maxAge) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append("=").append(value).append("; ");
+        sb.append("Max-Age=").append(maxAge).append("; ");
+        sb.append("Path=/; ");
+        sb.append("HttpOnly; ");
+        if (secure) {
+            sb.append("Secure; ");
         }
-        return cookie;
+        if (!"localhost".equals(domain)) {
+            sb.append("Domain=").append(domain).append("; ");
+        }
+        String sameSite = secure ? "None" : "Lax";
+        sb.append("SameSite=").append(sameSite);
+        response.addHeader("Set-Cookie", sb.toString());
     }
 
     private Optional<String> getCookieValue(HttpServletRequest request, String name) {

@@ -145,7 +145,8 @@ services:
       kafka:
         condition: service_healthy
       sonarqube:
-        condition: service_healthy
+        condition: service_started
+    restart: on-failure
 
   gateway-service:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/gateway-service:${IMAGE_TAG:-latest}
