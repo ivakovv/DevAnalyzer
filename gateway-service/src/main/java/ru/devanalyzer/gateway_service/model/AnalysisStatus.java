@@ -8,8 +8,11 @@ public enum AnalysisStatus {
     //Фильтрация репозиториев
     FILTERING("filtering"),
     
-    // Полный анализ кода через
+    // Полный анализ кода через Sonar
     ANALYZING("analyzing"),
+
+    //Формируем отчет
+    BUILDING_REPORT("building_report"),
     
     // Анализ успешно завершен
     COMPLETED("completed"),

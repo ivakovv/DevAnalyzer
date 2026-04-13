@@ -7,6 +7,7 @@ import ru.devanalyzer.analyzer_service.dto.AnalysisResult;
 import ru.devanalyzer.analyzer_service.dto.github.GitHubRepository;
 import ru.devanalyzer.analyzer_service.dto.kafka.AnalysisRequestDto;
 import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
+import ru.devanalyzer.analyzer_service.messaging.AnalysisResultProducer;
 import ru.devanalyzer.analyzer_service.model.AnalysisStatus;
 import ru.devanalyzer.analyzer_service.services.analysis.builder.AnalysisResultBuilder;
 import ru.devanalyzer.analyzer_service.services.analysis.notification.AnalysisStatusNotifier;
@@ -29,6 +30,7 @@ public class AnalysisService {
     private final GitHubRepositoryService gitHubRepositoryService;
     private final AuthorshipVerificationService authorshipService;
     private final RepositoryScanService scanService;
+    private final AnalysisResultProducer resultProducer;
 
     public void processAnalysisRequest(AnalysisRequestDto request) {
         log.info("Processing analysis for user: {}, userId: {}, requestId: {}",
@@ -61,6 +63,8 @@ public class AnalysisService {
                 requestedFilters.addAll(request.techStack());
             }
 
+            statusNotifier.notifyStatus(request, AnalysisStatus.BUILDING_REPORT);
+
             AnalysisResult result = resultBuilder.build(
                     request.githubUsername(),
                     allRepositories.size(),
@@ -69,7 +73,7 @@ public class AnalysisService {
                     requestedFilters.stream().distinct().sorted().toList()
             );
 
-
+            resultProducer.send(request.requestId(), result);
         } catch (Exception e) {
             log.error("Error during analysis processing for user: {}, userId: {}",
                     request.githubUsername(), request.userId(), e);

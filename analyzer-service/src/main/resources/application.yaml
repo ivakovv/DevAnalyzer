@@ -25,8 +25,8 @@ kafka:
     group-id: analyzer-service-group
   topics:
     analysis-request: analysis-request
-    analysis-response: analysis-response
     analysis-status: analysis-status
+    analysis-result: analysis-result
   concurrency: ${KAFKA_CONSUMER_CONCURRENCY}
 app:
   github:
