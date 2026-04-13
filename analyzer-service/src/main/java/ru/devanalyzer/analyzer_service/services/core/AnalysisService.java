@@ -63,6 +63,8 @@ public class AnalysisService {
                 requestedFilters.addAll(request.techStack());
             }
 
+            statusNotifier.notifyStatus(request, AnalysisStatus.BUILDING_REPORT);
+
             AnalysisResult result = resultBuilder.build(
                     request.githubUsername(),
                     allRepositories.size(),
