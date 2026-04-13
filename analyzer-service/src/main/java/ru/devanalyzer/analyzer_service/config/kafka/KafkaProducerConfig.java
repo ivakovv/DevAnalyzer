@@ -9,6 +9,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import ru.devanalyzer.analyzer_service.dto.AnalysisResult;
 import ru.devanalyzer.analyzer_service.dto.kafka.AnalysisResponseDto;
 
 import java.util.HashMap;
@@ -20,20 +21,33 @@ public class KafkaProducerConfig {
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Bean
-    public ProducerFactory<String, AnalysisResponseDto> producerFactory() {
+    private Map<String, Object> baseConfig() {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         config.put(ProducerConfig.RETRIES_CONFIG, 3);
         config.put(ProducerConfig.ACKS_CONFIG, "all");
+        return config;
+    }
 
-        return new DefaultKafkaProducerFactory<>(config);
+    @Bean
+    public ProducerFactory<String, AnalysisResponseDto> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(baseConfig());
     }
 
     @Bean
     public KafkaTemplate<String, AnalysisResponseDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(baseConfig());
+    }
+
+    @Bean
+    public KafkaTemplate<String, AnalysisResult> analysisResultKafkaTemplate() {
+        return new KafkaTemplate<>(analysisResultProducerFactory());
     }
 }
