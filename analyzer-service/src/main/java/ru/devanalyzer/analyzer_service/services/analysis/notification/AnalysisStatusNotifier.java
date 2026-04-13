@@ -18,9 +18,6 @@ public class AnalysisStatusNotifier {
     
     @Value("${kafka.topics.analysis-status}")
     private String statusTopic;
-    
-    @Value("${kafka.topics.analysis-response}")
-    private String responseTopic;
 
     public void notifyStatus(AnalysisRequestDto request, AnalysisStatus status) {
         messageProducer.sendToTopic(
@@ -36,13 +33,13 @@ public class AnalysisStatusNotifier {
 
     public void notifyFailed(AnalysisRequestDto request, Exception e) {
         messageProducer.sendToTopic(
-                responseTopic,
+                statusTopic,
                 request.requestId(),
                 request.userId(),
                 AnalysisStatus.FAILED.getValue()
         );
         
-        log.error("Analysis failed sent to {}: requestId={}, error={}", 
-                responseTopic, request.requestId(), e.getMessage());
+        log.error("Analysis failed sent to {}: requestId={}, error={}",
+                statusTopic, request.requestId(), e.getMessage());
     }
 }
