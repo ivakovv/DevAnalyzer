@@ -1,3 +1,23 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: analytic-service
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+clickhouse:
+  url: ${CLICKHOUSE_URL}
+  username: ${CLICKHOUSE_USERNAME}
+  password: ${CLICKHOUSE_PASSWORD}
+
+kafka:
+  bootstrap-servers: ${KAFKA_SERVERS}
+  topics:
+    analysis-result: analysis-result
+    analysis-status: analysis-status
+
+logging:
+  level:
+    ru.devanalyzer.analytic_service: DEBUG
