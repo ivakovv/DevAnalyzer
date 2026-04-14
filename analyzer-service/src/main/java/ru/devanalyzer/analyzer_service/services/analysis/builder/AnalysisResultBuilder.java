@@ -26,6 +26,8 @@ public class AnalysisResultBuilder {
     private final GitHubService gitHubService;
 
     public AnalysisResult build(
+            String requestId,
+            Long userId,
             String githubUsername,
             int totalRepos,
             List<GitHubRepository> filteredRepositories,
@@ -37,6 +39,8 @@ public class AnalysisResultBuilder {
         Integer overallScore = scoreCalculator.calculateScore(summary);
 
         return new AnalysisResult(
+                requestId,
+                userId,
                 githubUsername,
                 totalRepos,
                 filteredRepositories.size(),

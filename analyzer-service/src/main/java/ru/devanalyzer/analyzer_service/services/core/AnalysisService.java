@@ -66,6 +66,8 @@ public class AnalysisService {
             statusNotifier.notifyStatus(request, AnalysisStatus.BUILDING_REPORT);
 
             AnalysisResult result = resultBuilder.build(
+                    request.requestId(),
+                    request.userId(),
                     request.githubUsername(),
                     allRepositories.size(),
                     filteredRepositories,
