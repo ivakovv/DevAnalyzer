@@ -6,6 +6,8 @@ import ru.devanalyzer.analyzer_service.dto.sonar.RepositoryScanResult;
 import java.util.List;
 
 public record AnalysisResult(
+        String requestId,
+        Long userId,
         String githubUsername,
         int totalRepositories,
         int filteredRepositories,

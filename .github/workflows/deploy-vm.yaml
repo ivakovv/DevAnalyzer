@@ -18,7 +18,7 @@ jobs:
     
     strategy:
       matrix:
-        service: [gateway-service, user-service, analyzer-service]
+        service: [gateway-service, user-service, analyzer-service, analytic-service]
     
     steps:
     - name: Checkout code

@@ -11,6 +11,7 @@
         <module>gateway-service</module>
         <module>user-service</module>
         <module>analyzer-service</module>
+        <module>analytic-service</module>
     </modules>
     <properties>
         <java.version>21</java.version>

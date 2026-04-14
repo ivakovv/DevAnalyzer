@@ -49,15 +49,19 @@ spring:
               filters:
                 - RewritePath=/docs/user-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
             - id: analyzer-service-api
-              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              uri: ${ANALYZER_SERVICE_URL}
               predicates:
                 - Path=/api/github/**
             - id: analyzer-service-api-docs
-              uri: ${ANALYZER_SERVICE_URL:http://localhost:8082}
+              uri: ${ANALYZER_SERVICE_URL}
               predicates:
                 - Path=/docs/analyzer-service/v3/api-docs/**
               filters:
                 - RewritePath=/docs/analyzer-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
+            - id: analytic-service-api
+              uri: ${ANALYTIC_SERVICE_URL}
+              predicates:
+                - Path=/api/reports/**
 
   data:
     redis:
