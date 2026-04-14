@@ -149,6 +149,39 @@ services:
         condition: service_started
     restart: on-failure
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    ports:
+      - "8123:8123"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./analytic-service/src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      CLICKHOUSE_DB: devanalyzer
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      retries: 5
+
+  analytic-service:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/analytic-service:${IMAGE_TAG:-latest}
+    build: ./analytic-service
+    ports:
+      - "8083:8083"
+    environment:
+      KAFKA_SERVERS: kafka:29092
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
+      CLICKHOUSE_USERNAME: ${CLICKHOUSE_USERNAME}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      API_SERVER_URL: ${API_SERVER_URL}
+    depends_on:
+      kafka:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
   gateway-service:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-ivakovv/devanalyzer}/gateway-service:${IMAGE_TAG:-latest}
     build: ./gateway-service
@@ -170,6 +203,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       API_SERVER_URL: ${API_SERVER_URL}
+      ANALYTIC_SERVICE_URL: ${ANALYTIC_SERVICE_URL}
     depends_on:
       user-service:
         condition: service_started
@@ -186,3 +220,4 @@ volumes:
   sonarqube_logs:
   sonarqube_extensions:
   scan_temp:
+  clickhouse_data:
