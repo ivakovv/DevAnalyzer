@@ -65,6 +65,9 @@ public class AnalyticService {
     }
 
     public void removeFromFavorites(Long userId, String requestId) {
+        if (!favoritesRepository.isFavorite(userId, requestId)) {
+            throw new NotFoundException("Favorite not found: " + requestId);
+        }
         favoritesRepository.removeFromFavorites(requestId, userId);
     }
 }
