@@ -1,5 +1,7 @@
 package ru.devanalyzer.analytic_service.dto;
 
+import java.util.List;
+
 public record GitHubStatsDto(
         long githubId,
         String login,
@@ -11,5 +13,6 @@ public record GitHubStatsDto(
         int forks,
         int followers,
         int commits,
-        long ageInDays
+        long ageInDays,
+        List<WeekActivityDto> heatmap
 ) {}

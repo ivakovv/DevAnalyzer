@@ -21,3 +21,13 @@ kafka:
 logging:
   level:
     ru.devanalyzer.analytic_service: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+api:
+  server:
+    url: ${API_SERVER_URL}

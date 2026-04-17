@@ -26,3 +26,13 @@ CREATE TABLE IF NOT EXISTS devanalyzer.analysis_results
 )
 ENGINE = MergeTree()
 ORDER BY (created_at, user_id, github_username);
+
+CREATE TABLE IF NOT EXISTS devanalyzer.favorites
+(
+    id                           UUID DEFAULT generateUUIDv4(),
+    hr_user_id                   Int64,
+    request_id                   String,
+    added_at                     DateTime
+)
+ENGINE = MergeTree()
+ORDER BY (hr_user_id, added_at);
