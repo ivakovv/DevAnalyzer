@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.devanalyzer.analytic_service.dto.AnalysisPreviewDto;
 import ru.devanalyzer.analytic_service.dto.AnalysisReportResponse;
 import ru.devanalyzer.analytic_service.dto.AnalysisResultDto;
 import ru.devanalyzer.analytic_service.dto.AnalysisSummaryDto;
@@ -68,6 +69,34 @@ public class AnalysisResultRepository {
         );
     }
 
+    public boolean existsByRequestId(String requestId) {
+        String sql = "SELECT COUNT(*) FROM analysis_results WHERE request_id = ?";
+        Integer count = clickHouseJdbcTemplate.queryForObject(sql, Integer.class, requestId);
+        return count != null && count > 0;
+    }
+
+    public List<AnalysisPreviewDto> findHistoryByUserId(Long userId, int limit, int offset) {
+        String sql = """
+                SELECT request_id, github_username, overall_score,
+                       total_repositories, verified_repositories, successful_scans, created_at
+                FROM analysis_results
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """;
+
+        return clickHouseJdbcTemplate.query(sql,
+                (rs, rowNum) -> new AnalysisPreviewDto(
+                        rs.getString("request_id"),
+                        rs.getString("github_username"),
+                        rs.getInt("overall_score"),
+                        rs.getInt("total_repositories"),
+                        rs.getInt("verified_repositories"),
+                        rs.getLong("successful_scans"),
+                        rs.getTimestamp("created_at").toInstant()
+                ), userId, limit, offset);
+    }
+
     public Optional<AnalysisReportResponse> findByRequestId(String requestId) {
         String sql = """
                 SELECT request_id, user_id, github_username,
@@ -83,41 +112,41 @@ public class AnalysisResultRepository {
                 LIMIT 1
                 """;
 
-        List<AnalysisReportResponse> results = clickHouseJdbcTemplate.query(sql,
-                (rs, rowNum) -> {
-                    AnalysisSummaryDto summary = new AnalysisSummaryDto(
-                            rs.getInt("total_bugs"),
-                            rs.getInt("total_vulnerabilities"),
-                            rs.getInt("total_code_smells"),
-                            rs.getDouble("average_coverage"),
-                            rs.getInt("passed_quality_gate"),
-                            rs.getInt("failed_quality_gate"),
-                            0, 0, 0, 0, 0, 0,
-                            rs.getString("median_security_rating"),
-                            rs.getString("median_reliability_rating"),
-                            rs.getString("median_maintainability_rating")
-                    );
-
-                    return new AnalysisReportResponse(
-                            rs.getString("request_id"),
-                            rs.getLong("user_id"),
-                            rs.getString("github_username"),
-                            rs.getInt("total_repositories"),
-                            rs.getInt("filtered_repositories"),
-                            rs.getInt("verified_repositories"),
-                            rs.getLong("successful_scans"),
-                            rs.getLong("failed_scans"),
-                            rs.getInt("overall_score"),
-                            summary,
-                            fromJson(rs.getString("tech_stack_json"), TechStackAnalysisDto.class),
-                            fromJson(rs.getString("repositories_json"), new TypeReference<List<RepositoryScanResultDto>>() {}),
-                            fromJson(rs.getString("github_stats_json"), GitHubStatsDto.class),
-                            fromJson(rs.getString("github_repo_json"), new TypeReference<List<GitHubRepoDto>>() {}),
-                            rs.getTimestamp("created_at").toInstant()
-                    );
-                }, requestId);
-
+        List<AnalysisReportResponse> results = clickHouseJdbcTemplate.query(sql, this::mapRow, requestId);
         return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+    }
+
+    private AnalysisReportResponse mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
+        AnalysisSummaryDto summary = new AnalysisSummaryDto(
+                rs.getInt("total_bugs"),
+                rs.getInt("total_vulnerabilities"),
+                rs.getInt("total_code_smells"),
+                rs.getDouble("average_coverage"),
+                rs.getInt("passed_quality_gate"),
+                rs.getInt("failed_quality_gate"),
+                0, 0, 0, 0, 0, 0,
+                rs.getString("median_security_rating"),
+                rs.getString("median_reliability_rating"),
+                rs.getString("median_maintainability_rating")
+        );
+
+        return new AnalysisReportResponse(
+                rs.getString("request_id"),
+                rs.getLong("user_id"),
+                rs.getString("github_username"),
+                rs.getInt("total_repositories"),
+                rs.getInt("filtered_repositories"),
+                rs.getInt("verified_repositories"),
+                rs.getLong("successful_scans"),
+                rs.getLong("failed_scans"),
+                rs.getInt("overall_score"),
+                summary,
+                fromJson(rs.getString("tech_stack_json"), TechStackAnalysisDto.class),
+                fromJson(rs.getString("repositories_json"), new TypeReference<List<RepositoryScanResultDto>>() {}),
+                fromJson(rs.getString("github_stats_json"), GitHubStatsDto.class),
+                fromJson(rs.getString("github_repo_json"), new TypeReference<List<GitHubRepoDto>>() {}),
+                rs.getTimestamp("created_at").toInstant()
+        );
     }
 
     private String toJson(Object obj) {

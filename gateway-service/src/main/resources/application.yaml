@@ -62,6 +62,16 @@ spring:
               uri: ${ANALYTIC_SERVICE_URL}
               predicates:
                 - Path=/api/reports/**
+            - id: analytic-service-favorites
+              uri: ${ANALYTIC_SERVICE_URL}
+              predicates:
+                - Path=/api/favorites/**
+            - id: analytic-service-api-docs
+              uri: ${ANALYTIC_SERVICE_URL}
+              predicates:
+                - Path=/docs/analytic-service/v3/api-docs/**
+              filters:
+                - RewritePath=/docs/analytic-service/v3/api-docs(?<segment>.*), /v3/api-docs$\{segment}
 
   data:
     redis:
@@ -89,6 +99,8 @@ springdoc:
         url: /docs/user-service/v3/api-docs
       - name: Analyzer Service
         url: /docs/analyzer-service/v3/api-docs
+      - name: Analytic Service
+        url: /docs/analytic-service/v3/api-docs
 
 cookie:
   secure: ${COOKIE_SECURE}
