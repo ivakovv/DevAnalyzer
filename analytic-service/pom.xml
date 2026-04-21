@@ -71,6 +71,7 @@
 			<version>0.6.0</version>
 			<classifier>all</classifier>
 		</dependency>
+
 	</dependencies>
 
 	<build>
